@@ -1,5 +1,5 @@
-#include <stdio.h>
+#include <iostream>
 
 int main() {
-	std::printf("test from linux\n");
+	std::cout << "test from linux\n";
 }
