@@ -1,0 +1,15 @@
+{
+  "variant": 20,
+  "figures": [
+    "Trapezoid",
+    "Rhombus",
+    "Pentagon"
+  ],
+  "containers": [
+    "TNaryTree",
+    "TLinkedList"
+  ],
+  "finished_labs": {
+    "lab1": "lab1",
+  }
+}
