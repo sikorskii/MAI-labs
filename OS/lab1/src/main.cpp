@@ -24,16 +24,20 @@ int main() {
 
     asprintf(&filename2, "%s", buf);
 
-    //printf("%s\n", filename1);
-    //printf("%s\n", filename2);
-
-
-
     pid_t child1_pid, child2_pid;
 
-    int fd[2];
-    fd[0] = 55; //test
-    fd[1] = 66;
+    pipe(pipe1);
+    pipe(pipe2);
+
+    char *toc1;
+    char *toc2;
+    asprintf(&toc1, "%d", pipe1[0]);
+    asprintf(&toc2, "%d", pipe1[1]);
+
+    char *toc11;
+    char *toc22;
+    asprintf(&toc11, "%d", pipe2[0]);
+    asprintf(&toc22, "%d", pipe2[1]);
 
     child1_pid = fork();
 
@@ -44,7 +48,7 @@ int main() {
     else if (child1_pid == 0) { //child1
         printf("[%d] It's child1\n", getpid());
         fflush(stdout);
-        execl("child1.out", filename1); //execution of child1's program begins here
+        execl("child1.out", filename1, toc1, toc2, NULL); //execution of child1's program begins here
     }
 
     else { //parent
@@ -59,13 +63,14 @@ int main() {
         else if (child2_pid == 0) { //child2
             printf("[%d] It's child2\n", getpid());
             fflush(stdout);
-            execl("child2.out", filename2); //execution of child2's program begins here
+            execl("child2.out", filename2, toc11, toc22, NULL); //execution of child2's program begins here
         }
 
         //parent code below
 
         free(filename1);
         free(filename2);
+        //printf("%d", fd);
         return 0;
     }
 }
