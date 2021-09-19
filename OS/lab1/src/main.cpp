@@ -3,6 +3,7 @@
 #include <cstdlib>
 
 int main() {
+
 	int pipe1[2];
     int pipe2[2];
 
@@ -46,12 +47,15 @@ int main() {
     }
 
     else if (child1_pid == 0) { //child1
+
         printf("[%d] It's child1\n", getpid());
         fflush(stdout);
         execl("child1.out", filename1, toc1, toc2, NULL); //execution of child1's program begins here
+
     }
 
     else { //parent
+
         printf("[%d] It's parent. Child id: %d\n", getpid(), child1_pid);
         fflush(stdout);
         child2_pid = fork();
@@ -61,16 +65,18 @@ int main() {
         }
 
         else if (child2_pid == 0) { //child2
+
             printf("[%d] It's child2\n", getpid());
             fflush(stdout);
-            execl("child2.out", filename2, toc11, toc22, NULL); //execution of child2's program begins here
+            execl("child1.out", filename2, toc11, toc22, NULL); //execution of child2's program begins here
+
         }
 
         //parent code below
 
         free(filename1);
         free(filename2);
-        //printf("%d", fd);
+
         return 0;
     }
 }
