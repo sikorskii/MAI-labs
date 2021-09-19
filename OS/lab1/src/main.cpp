@@ -1,5 +1,5 @@
 #include "unistd.h"
-#include <cstdio>
+#include <stdio.h>
 #include <cstdlib>
 
 // 0 - reading
@@ -88,22 +88,13 @@ int main() {
         free(filename1);
         free(filename2);
 
-        int x, y;
-        printf("Enter x and y\n");
-        scanf("%d", &x);
-        scanf("%d", &y);
-
-        int x1, y1;
-        printf("Enter x1 and y1\n");
-        scanf("%d", &x1);
-        scanf("%d", &y1);
-        fflush(stdout);
-        write(pipe1[1], &x, sizeof(int));
-        write(pipe1[1], &y, sizeof(int));
-
-        write(pipe2[1], &x1, sizeof(int));
-        write(pipe2[1], &y1, sizeof(int));
-
+        char *str;
+        size_t len = 0;
+        long read;
+        while ((read = getline(&str, &len, stdin)) != -1) {
+            printf("Retrieved line of length %zu :\n", read);
+            printf("%s", str);
+        }
         close(pipe1[0]);
         close(pipe1[1]);
         close(pipe2[0]);

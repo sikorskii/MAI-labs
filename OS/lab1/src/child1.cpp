@@ -21,13 +21,8 @@ int main(int argc, char* argv[]) {
     fprintf(fp, "%d\n", fd[1]);
     fflush(stdout);
 
-    int x, y;
     char buf[50];
 
-    read(fd[0], &x, sizeof(int));
-    read(fd[0], &y, sizeof(int));
-    fflush(stdout);
-    fprintf(fp, "RESULT IS %d\n", x + y);
 
     close(fd[0]);
     close(fd[1]);
