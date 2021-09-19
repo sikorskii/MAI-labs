@@ -1,5 +1,6 @@
 #include "unistd.h"
-#include <stdio.h>
+#include <cstdio>
+#include <cstring>
 #include <cstdlib>
 
 // 0 - reading
@@ -89,17 +90,24 @@ int main() {
         free(filename2);
 
         char *str;
-        size_t len = 0;
-        long read;
-        while ((read = getline(&str, &len, stdin)) != -1) {
-            printf("Retrieved line of length %zu :\n", read);
-            printf("%s", str);
+        while (true) {
+            str = fgets (buf, sizeof(buf), stdin);
+
+            if(strlen(buf) == 1)
+                continue;
+
+            if (str == nullptr)
+                break;
+
+            printf("%d\n", (int)strlen(buf) - 1);
+            printf("%s", buf);
         }
+
         close(pipe1[0]);
         close(pipe1[1]);
         close(pipe2[0]);
         close(pipe1[1]);
-
+        free(str);
         return 0;
     }
 }
