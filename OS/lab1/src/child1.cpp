@@ -19,8 +19,13 @@ int main(int argc, char* argv[]) {
     fprintf(fp, "child1 been here\n");
     fprintf(fp, "%d\n", fd[0]);
     fprintf(fp, "%d\n", fd[1]);
+    fflush(stdout);
 
-    close(fd[1]);
+    int x, y;
+    read(fd[0], &x, sizeof(int));
+    read(fd[0], &y, sizeof(int));
+    fflush(stdout);
+    fprintf(fp, "RESULT IS %d\n", x + y);
 
     fclose(fp);
     return 0;

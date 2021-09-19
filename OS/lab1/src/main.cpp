@@ -33,22 +33,12 @@ int main() {
     if (pipe(pipe1) == -1) {
         perror("Pipe error!");
     }
-    if (pipe(pipe2) == -1) {
-        perror("Pipe error!");
-    }
-
-    close(pipe1[0]);
-    close(pipe2[0]);
 
     char *toc1;
     char *toc2;
     asprintf(&toc1, "%d", pipe1[0]);
     asprintf(&toc2, "%d", pipe1[1]);
 
-    char *toc11;
-    char *toc22;
-    asprintf(&toc11, "%d", pipe2[0]);
-    asprintf(&toc22, "%d", pipe2[1]);
 
     child1_pid = fork();
 
@@ -68,6 +58,16 @@ int main() {
 
         printf("[%d] It's parent. Child id: %d\n", getpid(), child1_pid);
         fflush(stdout);
+
+        if (pipe(pipe2) == -1) {
+            perror("Pipe error!");
+        }
+
+        char *toc11;
+        char *toc22;
+        asprintf(&toc11, "%d", pipe2[0]);
+        asprintf(&toc22, "%d", pipe2[1]);
+
         child2_pid = fork();
 
         if (child2_pid == -1) { //error
@@ -86,6 +86,22 @@ int main() {
 
         free(filename1);
         free(filename2);
+
+        int x, y;
+        printf("Enter x and y\n");
+        scanf("%d", &x);
+        scanf("%d", &y);
+
+        int x1, y1;
+        printf("Enter x1 and y1\n");
+        scanf("%d", &x1);
+        scanf("%d", &y1);
+        fflush(stdout);
+        write(pipe1[1], &x, sizeof(int));
+        write(pipe1[1], &y, sizeof(int));
+
+        write(pipe2[1], &x1, sizeof(int));
+        write(pipe2[1], &y1, sizeof(int));
 
         return 0;
     }
