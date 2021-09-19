@@ -2,9 +2,12 @@
 #include <cstdio>
 #include <cstdlib>
 
+// 0 - reading
+// 1 - writing
+
 int main() {
 
-	int pipe1[2];
+    int pipe1[2];
     int pipe2[2];
 
     if (pipe(pipe1) == -1 || pipe(pipe2) == -1) {
@@ -27,8 +30,15 @@ int main() {
 
     pid_t child1_pid, child2_pid;
 
-    pipe(pipe1);
-    pipe(pipe2);
+    if (pipe(pipe1) == -1) {
+        perror("Pipe error!");
+    }
+    if (pipe(pipe2) == -1) {
+        perror("Pipe error!");
+    }
+
+    close(pipe1[0]);
+    close(pipe2[0]);
 
     char *toc1;
     char *toc2;

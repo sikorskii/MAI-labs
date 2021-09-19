@@ -4,7 +4,9 @@
 
 #include <cstdio>
 #include <cstdlib>
-
+#include <unistd.h>
+// 0 - reading
+// 1 - writing
 int main(int argc, char* argv[]) {
     printf("\ni am child 1 and i will write in file %s\n", argv[0]);
 
@@ -17,6 +19,8 @@ int main(int argc, char* argv[]) {
     fprintf(fp, "child1 been here\n");
     fprintf(fp, "%d\n", fd[0]);
     fprintf(fp, "%d\n", fd[1]);
+
+    close(fd[1]);
 
     fclose(fp);
     return 0;
