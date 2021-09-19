@@ -90,23 +90,31 @@ int main() {
         free(filename2);
 
         char *str;
-        while (true) {
-            str = fgets (buf, sizeof(buf), stdin);
 
-            if(strlen(buf) == 1)
+        while (true) {
+            char c[50];
+            str = fgets (c, sizeof(c), stdin);
+
+            if(strlen(c) == 1)
                 continue;
 
             if (str == nullptr)
                 break;
 
-            printf("%d\n", (int)strlen(buf) - 1);
-            printf("%s", buf);
+            close(pipe1[0]);
+            close(pipe2[0]);
+
+            if ((strlen(c) - 1) % 2 == 0) {
+                write(pipe2[1], c, strlen(c) + 1);
+            }
+            else {
+                write(pipe1[1], c, strlen(c) + 1);
+            }
+
+            printf("%d\n", (int)strlen(c) - 1);
+            printf("%s", c);
         }
 
-        close(pipe1[0]);
-        close(pipe1[1]);
-        close(pipe2[0]);
-        close(pipe1[1]);
         free(str);
         return 0;
     }

@@ -3,29 +3,43 @@
 //
 
 #include <cstdio>
+#include <cstring>
 #include <cstdlib>
 #include <unistd.h>
 // 0 - reading
 // 1 - writing
+void reverse(char *str) {
+    int i = 0;
+    int j = (int)strlen(str) - 1;
+
+    while(i < j) {
+        char temp = str[i];
+        str[i] = str[j];
+        str[j] = temp;
+        i++;
+        j--;
+    }
+}
+
 int main(int argc, char* argv[]) {
-    printf("\ni am child 1 and i will write in file %s\n", argv[0]);
+    printf("\ni am child and i will write in file %s\n", argv[0]);
 
     int fd[2];
-    fd[0] = (int)strtol(argv[1], nullptr,  10);
-    fd[1] = (int)strtol(argv[2], nullptr, 10);
+    fd[0] = (int) strtol(argv[1], nullptr, 10);
+    fd[1] = (int) strtol(argv[2], nullptr, 10);
 
     FILE *fp = fopen(argv[0], "w");
 
-    fprintf(fp, "child1 been here\n");
-    fprintf(fp, "%d\n", fd[0]);
-    fprintf(fp, "%d\n", fd[1]);
-    fflush(stdout);
+    fprintf(fp, "child been here\n");
 
+    close(fd[1]);
     char buf[50];
 
+    while(read(fd[0], buf, sizeof(buf)) != 0) {
+        reverse(buf);
+        fprintf(fp, "Received string: %s\n", buf);
+    }
 
-    close(fd[0]);
-    close(fd[1]);
     fclose(fp);
     return 0;
 }
