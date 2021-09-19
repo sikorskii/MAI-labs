@@ -111,8 +111,6 @@ int main() {
                 write(pipe1[1], c, strlen(c) + 1);
             }
 
-            printf("%d\n", (int)strlen(c) - 1);
-            printf("%s", c);
         }
 
         free(str);
