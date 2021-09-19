@@ -4,6 +4,7 @@
 
 // 0 - reading
 // 1 - writing
+//MAX STRING LENGTH IS 50
 
 int main() {
 
@@ -14,7 +15,7 @@ int main() {
         perror("Pipe error!");
     }
 
-    char buf[20];
+    char buf[50];
     char *filename1;
     char *filename2;
 
@@ -102,6 +103,11 @@ int main() {
 
         write(pipe2[1], &x1, sizeof(int));
         write(pipe2[1], &y1, sizeof(int));
+
+        close(pipe1[0]);
+        close(pipe1[1]);
+        close(pipe2[0]);
+        close(pipe1[1]);
 
         return 0;
     }
