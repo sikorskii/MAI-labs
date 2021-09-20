@@ -17,17 +17,18 @@ int main() {
     }
 
     char buf[50];
+
     char *filename1;
     char *filename2;
 
     printf("Enter file1 name\n");
-    scanf("%s", buf);
-
+    //scanf("%s", buf);
+    filename1 = fgets (buf, sizeof(buf) - 1, stdin);
     asprintf(&filename1, "%s", buf);
 
     printf("Enter file2 name\n");
-    scanf("%s", buf);
-
+    //scanf("%s", buf);
+    filename2 = fgets (buf, sizeof(buf) - 1, stdin);
     asprintf(&filename2, "%s", buf);
 
     pid_t child1_pid, child2_pid;
@@ -52,7 +53,7 @@ int main() {
 
         printf("[%d] It's child1\n", getpid());
         fflush(stdout);
-        execl("child1.out", filename1, toc1, toc2, NULL); //execution of child1's program begins here
+        execl("child1.out", "child1", filename1, toc1, toc2, NULL); //execution of child1's program begins here
 
     }
 
@@ -80,7 +81,7 @@ int main() {
 
             printf("[%d] It's child2\n", getpid());
             fflush(stdout);
-            execl("child1.out", filename2, toc11, toc22, NULL); //execution of child2's program begins here
+            execl("child1.out", "child2", filename2, toc11, toc22, NULL); //execution of child2's program begins here
 
         }
 
@@ -88,6 +89,10 @@ int main() {
 
         free(filename1);
         free(filename2);
+        free(toc1);
+        free(toc2);
+        free(toc11);
+        free(toc22);
 
         char *str;
 
@@ -113,7 +118,6 @@ int main() {
 
         }
 
-        free(str);
         return 0;
     }
 }

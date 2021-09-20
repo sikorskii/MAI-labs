@@ -22,14 +22,13 @@ void reverse(char *str) {
 }
 
 int main(int argc, char* argv[]) {
-    printf("\ni am child and i will write in file %s\n", argv[0]);
+    printf("\ni am child and i will write in file %s\n", argv[1]);
 
     int fd[2];
-    fd[0] = (int) strtol(argv[1], nullptr, 10);
-    fd[1] = (int) strtol(argv[2], nullptr, 10);
+    fd[0] = (int) strtol(argv[2], nullptr, 10);
+    fd[1] = (int) strtol(argv[3], nullptr, 10);
 
-    FILE *fp = fopen(argv[0], "w");
-
+    FILE *fp = fopen(argv[1], "w");
     fprintf(fp, "child been here\n");
 
     close(fd[1]);
@@ -37,7 +36,9 @@ int main(int argc, char* argv[]) {
 
     while(read(fd[0], buf, sizeof(buf)) != 0) {
         reverse(buf);
+        //printf("Recieved : %s\n", buf);
         fprintf(fp, "Received string: %s\n", buf);
+        fflush(fp);
     }
 
     fclose(fp);
