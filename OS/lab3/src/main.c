@@ -7,9 +7,5 @@
 
 int main() {
     int **matrix;
-
-
-
-
-
+    matrix = getMatrix();
 }

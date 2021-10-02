@@ -8,16 +8,19 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <time.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 int getRandInt();
 
-void fillFromInput();
+int** fillFromInput();
 
-void fillWithRand();
+int** fillWithRand();
 
 bool prompt();
 
 int** getMatrix();
 
+void printMatrix(int **matrix, int n);
 
 #endif //LAB3_MTXUTILS_H
