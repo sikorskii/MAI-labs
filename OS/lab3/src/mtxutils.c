@@ -69,11 +69,15 @@ int** getMatrix() {
     int **matrix = NULL;
 
     if (prompt()) {
+
         srand(time(NULL));
         matrix = fillWithRand(n);
+
     }
     else {
+
         matrix = fillFromInput(n);
+
     }
 
     printMatrix(matrix, n);
