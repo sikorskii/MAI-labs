@@ -1,5 +1,15 @@
 #include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include "mtxutils.h"
+
+
 
 int main() {
-    printf("Lab3 rep\n");
+    int **matrix;
+
+
+
+
+
 }
