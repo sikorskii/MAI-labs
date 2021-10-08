@@ -11,10 +11,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-typedef struct{
+typedef struct matrix {
     int **matrix;
     int size;
-} matrix;
+} mtx;
 
 int getRandInt();
 
@@ -24,8 +24,12 @@ int** fillWithRand();
 
 bool prompt();
 
-matrix getMatrix();
+mtx getMatrix();
 
-void printMatrix(matrix);
+mtx getEmptyMatrix(int n);
+
+mtx getReducedMatrix(mtx matrix, int column, int row);
+
+void printMatrix(mtx);
 
 #endif //LAB3_MTXUTILS_H

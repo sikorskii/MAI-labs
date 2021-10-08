@@ -47,7 +47,7 @@ int** fillFromInput(int n) {
 }
 
 bool prompt() {
-    printf("Fill matrix with random values?\n Enter 1/0 \n");
+    printf("Fill mtx with random values?\n Enter 1/0 \n");
     int mode;
     scanf("%d", &mode);
 
@@ -63,11 +63,11 @@ bool prompt() {
     }
 }
 
-matrix getMatrix() {
+mtx getMatrix() {
     int n;
-    printf("Enter matrix's dimension: \n");
+    printf("Enter mtx's dimension: \n");
     scanf("%d", &n);
-    matrix matrix;
+    mtx matrix;
     matrix.size = n;
     matrix.matrix = NULL;
 
@@ -87,7 +87,46 @@ matrix getMatrix() {
 
 }
 
-void printMatrix(matrix matrix) {
+mtx getEmptyMatrix(int n) {
+    mtx matrix;
+    matrix.size = n;
+    matrix.matrix = malloc(n * sizeof(int*));
+
+    for (int i = 0; i < n; i++)
+        matrix.matrix[i] = malloc(n * sizeof(int));
+
+
+    return matrix;
+
+}
+
+mtx getReducedMatrix(mtx matrix, int column, int row) {
+    int offsetRow = 0;
+    int offsetCol = 0;
+
+    mtx newMatrix = getEmptyMatrix(matrix.size - 1);
+
+    for(int i = 0; i < matrix.size - 1; i++) {
+
+        if(i == row) {
+            offsetRow++;
+        }
+
+        offsetCol = 0;
+        for(int j = 0; j < matrix.size - 1; j++) {
+            if(j == column) {
+                offsetCol = 1;
+            }
+
+            newMatrix.matrix[i][j] = matrix.matrix[i + offsetRow][j + offsetCol];
+        }
+    }
+
+    return newMatrix;
+
+}
+
+void printMatrix(mtx matrix) {
     printf("-----------------Matrix %d by %d-----------------\n", matrix.size);
     for (int i = 0; i < matrix.size; i++) {
 
