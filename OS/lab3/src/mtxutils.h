@@ -5,16 +5,16 @@
 #ifndef LAB3_MTXUTILS_H
 #define LAB3_MTXUTILS_H
 
-typedef struct{
-    int **matrix;
-    int size;
-} matrix;
-
 #include <stdbool.h>
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+typedef struct{
+    int **matrix;
+    int size;
+} matrix;
 
 int getRandInt();
 
