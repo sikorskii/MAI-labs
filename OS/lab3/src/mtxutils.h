@@ -5,6 +5,11 @@
 #ifndef LAB3_MTXUTILS_H
 #define LAB3_MTXUTILS_H
 
+typedef struct{
+    int **matrix;
+    int size;
+} matrix;
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <time.h>
@@ -19,8 +24,8 @@ int** fillWithRand();
 
 bool prompt();
 
-int** getMatrix();
+matrix getMatrix();
 
-void printMatrix(int **matrix, int n);
+void printMatrix(matrix);
 
 #endif //LAB3_MTXUTILS_H

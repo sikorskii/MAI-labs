@@ -4,7 +4,8 @@
 
 #include "mtxutils.h"
 
-#define MAX_ELEMENT 1000
+#define MAX_ELEMENT 10
+
 
 int getRandInt() {
     return rand() % MAX_ELEMENT;
@@ -62,36 +63,38 @@ bool prompt() {
     }
 }
 
-int** getMatrix() {
+matrix getMatrix() {
     int n;
     printf("Enter matrix's dimension: \n");
     scanf("%d", &n);
-    int **matrix = NULL;
+    matrix matrix;
+    matrix.size = n;
+    matrix.matrix = NULL;
 
     if (prompt()) {
 
         srand(time(NULL));
-        matrix = fillWithRand(n);
+        matrix.matrix = fillWithRand(n);
 
     }
     else {
 
-        matrix = fillFromInput(n);
+        matrix.matrix = fillFromInput(n);
 
     }
 
-    printMatrix(matrix, n);
+    printMatrix(matrix);
     return matrix;
 
 }
 
-void printMatrix(int **matrix, int n) {
-    printf("-----------------Matrix %d by %d-----------------\n", n);
-    for (int i = 0; i < n; i++) {
+void printMatrix(matrix matrix) {
+    printf("-----------------Matrix %d by %d-----------------\n", matrix.size);
+    for (int i = 0; i < matrix.size; i++) {
 
-        for (int j = 0; j < n; j++){
+        for (int j = 0; j < matrix.size; j++){
 
-            printf("%5d ", matrix[i][j]);
+            printf("%5d ", matrix.matrix[i][j]);
 
         }
 
