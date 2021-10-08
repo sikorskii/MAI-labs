@@ -28,7 +28,7 @@ mtx getMatrix();
 
 mtx getEmptyMatrix(int n);
 
-mtx getReducedMatrix(mtx matrix, int column, int row);
+mtx getReducedMatrix(mtx *matrix, int column, int row);
 
 void printMatrix(mtx);
 

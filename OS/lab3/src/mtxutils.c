@@ -100,25 +100,25 @@ mtx getEmptyMatrix(int n) {
 
 }
 
-mtx getReducedMatrix(mtx matrix, int column, int row) {
+mtx getReducedMatrix(mtx *matrix, int column, int row) {
     int offsetRow = 0;
     int offsetCol = 0;
 
-    mtx newMatrix = getEmptyMatrix(matrix.size - 1);
+    mtx newMatrix = getEmptyMatrix(matrix->size - 1);
 
-    for(int i = 0; i < matrix.size - 1; i++) {
+    for(int i = 0; i < matrix->size - 1; i++) {
 
         if(i == row) {
             offsetRow++;
         }
 
         offsetCol = 0;
-        for(int j = 0; j < matrix.size - 1; j++) {
+        for(int j = 0; j < matrix->size - 1; j++) {
             if(j == column) {
                 offsetCol = 1;
             }
 
-            newMatrix.matrix[i][j] = matrix.matrix[i + offsetRow][j + offsetCol];
+            newMatrix.matrix[i][j] = matrix->matrix[i + offsetRow][j + offsetCol];
         }
     }
 
@@ -127,7 +127,7 @@ mtx getReducedMatrix(mtx matrix, int column, int row) {
 }
 
 void printMatrix(mtx matrix) {
-    printf("-----------------Matrix %d by %d-----------------\n", matrix.size);
+    printf("-----------------Matrix %d by %d-----------------\n", matrix.size, matrix.size);
     for (int i = 0; i < matrix.size; i++) {
 
         for (int j = 0; j < matrix.size; j++){
