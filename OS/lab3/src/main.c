@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <stdlib.h>
+
 #include "mtxutils.h"
+#include "tutils.h"
 
 void *func(void *arg) {
-    printf("This is thread %lu\n", pthread_self());
+    //printf("This is thread %lu\n", pthread_self());
     pthread_exit(NULL);
 }
 
@@ -17,7 +19,7 @@ int main(int argc, char** argv) {
 
     int threads_num = (int)strtol(argv[1], NULL, 10);
 
-    matrix matrix;
+    mtx matrix;
     matrix = getMatrix();
     printMatrix(matrix);
 
@@ -35,6 +37,11 @@ int main(int argc, char** argv) {
             printf("Unable to join %d-th thread\n", i);
             exit(1);
         }
+    }
+
+    for (int i = 0; i < matrix.size; i++) {
+        mtx newMatrix = getReducedMatrix(matrix, i, 0);
+        printMatrix(newMatrix);
     }
 
     free(threads);
