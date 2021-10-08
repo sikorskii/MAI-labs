@@ -83,7 +83,6 @@ matrix getMatrix() {
 
     }
 
-    printMatrix(matrix);
     return matrix;
 
 }
