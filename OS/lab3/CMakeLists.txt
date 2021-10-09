@@ -5,4 +5,4 @@ set(CMAKE_C_STANDARD 99)
 
 set ( CMAKE_C_FLAGS "-pthread")
 
-add_executable(lab3 src/main.c headers/mtxutils.c headers/mtxutils.h src/tutils.c headers/tutils.h)
+add_executable(lab3 src/main.c src/mtxutils.c headers/mtxutils.h src/tutils.c headers/tutils.h)

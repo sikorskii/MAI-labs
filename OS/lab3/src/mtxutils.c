@@ -2,7 +2,7 @@
 // Created by aldes on 02.10.2021.
 //
 
-#include "mtxutils.h"
+#include "../headers/mtxutils.h"
 
 #define MAX_ELEMENT 2
 
