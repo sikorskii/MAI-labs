@@ -41,9 +41,11 @@ int main(int argc, char** argv) {
 
     for (int i = 0; i < matrix.size; i++) {
         mtx newMatrix = getReducedMatrix(&matrix, i, 0);
-        printMatrix(&newMatrix);
+        //printMatrix(&newMatrix);
         cleanMatrix(&newMatrix);
     }
+
+    printf("Calcucated det is: %d\n", calculateDet(&matrix));
 
     cleanMatrix(&matrix);
 

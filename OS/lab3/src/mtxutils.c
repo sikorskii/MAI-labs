@@ -4,7 +4,7 @@
 
 #include "mtxutils.h"
 
-#define MAX_ELEMENT 10
+#define MAX_ELEMENT 2
 
 
 int getRandInt() {
@@ -105,15 +105,15 @@ mtx getReducedMatrix(mtx *matrix, int column, int row) {
 
     mtx newMatrix = getEmptyMatrix(matrix->size - 1);
 
-    for(int i = 0; i < matrix->size - 1; i++) {
+    for (int i = 0; i < matrix->size - 1; i++) {
 
-        if(i == row) {
+        if (i == row) {
             offsetRow++;
         }
 
         offsetColumn = 0;
-        for(int j = 0; j < matrix->size - 1; j++) {
-            if(j == column) {
+        for (int j = 0; j < matrix->size - 1; j++) {
+            if (j == column) {
                 offsetColumn++;
             }
 
@@ -145,4 +145,33 @@ void cleanMatrix(mtx* matrix) {
         free(matrix->matrix[i]);
 
     free(matrix->matrix);
+}
+
+int calculateDet(mtx* matrix) {
+    int det = 0;
+    int degree = 1;
+
+    if(matrix->size == 1) {
+        return matrix->matrix[0][0];
+    }
+
+    else if(matrix->size == 2) {
+        return matrix->matrix[0][0] * matrix->matrix[1][1]
+                - matrix->matrix[0][1] * matrix->matrix[1][0];
+    }
+    else {
+        mtx newMatrix;
+
+        for(int j = 0; j < matrix->size; j++) {
+
+            newMatrix = getReducedMatrix(matrix, j, 0);
+
+
+            det = det + (degree * matrix->matrix[0][j] * calculateDet(&newMatrix));
+            degree = -degree;
+            cleanMatrix(&newMatrix);
+        }
+    }
+
+    return det;
 }
