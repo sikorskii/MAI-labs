@@ -30,6 +30,8 @@ mtx getEmptyMatrix(int n);
 
 mtx getReducedMatrix(mtx *matrix, int column, int row);
 
-void printMatrix(mtx);
+void printMatrix(mtx* matrix);
+
+void cleanMatrix(mtx* matrix);
 
 #endif //LAB3_MTXUTILS_H

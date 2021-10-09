@@ -19,11 +19,10 @@ int** fillWithRand(int n) {
 
         matrix[i] = malloc(n * sizeof(int));
 
-        for (int j = 0; j < n; j++) {
+        for (int j = 0; j < n; j++)
 
             matrix[i][j] = getRandInt();
 
-        }
     }
 
     return matrix;
@@ -102,7 +101,7 @@ mtx getEmptyMatrix(int n) {
 
 mtx getReducedMatrix(mtx *matrix, int column, int row) {
     int offsetRow = 0;
-    int offsetCol = 0;
+    int offsetColumn = 0;
 
     mtx newMatrix = getEmptyMatrix(matrix->size - 1);
 
@@ -112,13 +111,13 @@ mtx getReducedMatrix(mtx *matrix, int column, int row) {
             offsetRow++;
         }
 
-        offsetCol = 0;
+        offsetColumn = 0;
         for(int j = 0; j < matrix->size - 1; j++) {
             if(j == column) {
-                offsetCol = 1;
+                offsetColumn++;
             }
 
-            newMatrix.matrix[i][j] = matrix->matrix[i + offsetRow][j + offsetCol];
+            newMatrix.matrix[i][j] = matrix->matrix[i + offsetRow][j + offsetColumn];
         }
     }
 
@@ -126,17 +125,24 @@ mtx getReducedMatrix(mtx *matrix, int column, int row) {
 
 }
 
-void printMatrix(mtx matrix) {
-    printf("-----------------Matrix %d by %d-----------------\n", matrix.size, matrix.size);
-    for (int i = 0; i < matrix.size; i++) {
+void printMatrix(mtx *matrix) {
+    printf("-----------------Matrix %d by %d-----------------\n", matrix->size, matrix->size);
+    for (int i = 0; i < matrix->size; i++) {
 
-        for (int j = 0; j < matrix.size; j++){
+        for (int j = 0; j < matrix->size; j++){
 
-            printf("%5d ", matrix.matrix[i][j]);
+            printf("%5d ", matrix->matrix[i][j]);
 
         }
 
         printf("\n");
 
     }
+}
+
+void cleanMatrix(mtx* matrix) {
+    for (int i = 0; i < matrix->size; i++)
+        free(matrix->matrix[i]);
+
+    free(matrix->matrix);
 }

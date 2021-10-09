@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
 
     mtx matrix;
     matrix = getMatrix();
-    printMatrix(matrix);
+    printMatrix(&matrix);
 
     pthread_t *threads = calloc(threads_num, sizeof(pthread_t));
 
@@ -41,17 +41,11 @@ int main(int argc, char** argv) {
 
     for (int i = 0; i < matrix.size; i++) {
         mtx newMatrix = getReducedMatrix(&matrix, i, 0);
-        printMatrix(newMatrix);
-        for(int j = 0; j < newMatrix.size; j++)
-            free (newMatrix.matrix[j]);
-
-        free(newMatrix.matrix);
+        printMatrix(&newMatrix);
+        cleanMatrix(&newMatrix);
     }
 
-    for (int i = 0; i < matrix.size; i++)
-        free(matrix.matrix[i]);
-
-    free(matrix.matrix);
+    cleanMatrix(&matrix);
 
     free(threads);
 }
