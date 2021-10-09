@@ -2,9 +2,11 @@
 // Created by aldes on 02.10.2021.
 //
 
+#include <math.h>
 #include "../headers/mtxutils.h"
 
-#define MAX_ELEMENT 2
+#define MAX_ELEMENT 5
+
 
 
 int getRandInt() {
@@ -147,9 +149,12 @@ void cleanMatrix(mtx* matrix) {
     free(matrix->matrix);
 }
 
-int calculateDet(mtx* matrix) {
+int calculateDet(mtx* matrix, int leftBound, int rightBound) {
     int det = 0;
-    int degree = 1;
+    int degree = (int)pow(-1, leftBound);
+
+    int lb = leftBound;
+    int rb = rightBound;
 
     if(matrix->size == 1) {
         return matrix->matrix[0][0];
@@ -162,12 +167,12 @@ int calculateDet(mtx* matrix) {
     else {
         mtx newMatrix;
 
-        for(int j = 0; j < matrix->size; j++) {
+        for(int j = leftBound; j <= rightBound; j++) {
 
             newMatrix = getReducedMatrix(matrix, j, 0);
 
 
-            det = det + (degree * matrix->matrix[0][j] * calculateDet(&newMatrix));
+            det = det + (degree * matrix->matrix[0][j] * calculateDet(&newMatrix, leftBound, rightBound));
             degree = -degree;
             cleanMatrix(&newMatrix);
         }

@@ -5,18 +5,19 @@
 #include "../headers/mtxutils.h"
 #include "../headers/tutils.h"
 
-typedef struct arguments {
-    mtx *matrix;
-    int i;
-} arg_t;
+
 
 void *func(void *args) {
     arg_t *args_s = (arg_t*) args;
     printf("This is thread %lu\n", pthread_self());
+    printf("My matrix size is %d, my right bound is %d\n", args_s->matrix->size, args_s->right_bound);
+    args_s->result = calculateDet(args_s->matrix, args_s->left_bound, args_s->right_bound);
+    //free(args_s);
+    //return NULL;
     pthread_exit(NULL);
 }
 
-int main(int argc, char** argv) {
+signed main(signed argc, char** argv) {
 
     if (argc != 2) {
         printf("Not enough args. Please specify the number of threads: "
@@ -41,6 +42,8 @@ int main(int argc, char** argv) {
 
     }
 
+    columnsPerThread = matrix.size / threads_num;
+
     printf("Colums per thread: %d\n Threads: %d, Matrix.size: %d\n",
            columnsPerThread, threads_num, matrix.size);
 
@@ -48,9 +51,45 @@ int main(int argc, char** argv) {
 
     arg_t *thread_args = calloc(threads_num, sizeof(arg_t));
 
-    createThreads(threads_num, threads, &func);
+    arg_t testarg = {&matrix, 10, 10, 333};
+
+    for (int i = 0; i < threads_num; i++) {
+        thread_args[i].matrix = &matrix;
+        thread_args[i].result = 0;
+        thread_args[i].left_bound = i * columnsPerThread;
+        thread_args[i].right_bound = thread_args[i].left_bound + columnsPerThread;
+    }
+
+    thread_args[threads_num - 1].left_bound = (threads_num - 1) * columnsPerThread;
+    thread_args[threads_num - 1].right_bound = matrix.size;
+
+    for (int i = 0; i < threads_num; i++) {
+        //printf("size %d left %d right %d\n", thread_args[i].matrix->size, thread_args[i].left_bound, thread_args[i].right_bound);
+    }
+
+    for (int i = 0; i < threads_num; i++) {
+
+        if (pthread_create(&threads[i], NULL, func, (void*)&thread_args[i]) != 0) {
+
+            printf("Unable to create %d-th thread\n", i);
+            exit(1);
+
+        }
+
+    }
+
+    //createThreads(threads_num, threads, &func, thread_args);
 
     joinThreads(threads_num, threads);
+
+    long long ans = 0;
+    int degree = 1;
+    for (int i = 0; i < threads_num; i++) {
+        ans += degree * thread_args[i].result;
+        degree = -degree;
+        printf("ans i = %d\n", thread_args[i].result);
+    }
+    free(thread_args);
 
     for (int i = 0; i < matrix.size; i++) {
         mtx newMatrix = getReducedMatrix(&matrix, i, 0);
@@ -58,7 +97,8 @@ int main(int argc, char** argv) {
         cleanMatrix(&newMatrix);
     }
 
-    printf("Calcucated det is: %d\n", calculateDet(&matrix));
+    printf("Calcucated det is: %d\n", calculateDet(&matrix, 0, matrix.size));
+    printf("Multithreading result is %lld\n", ans);
 
     cleanMatrix(&matrix);
 

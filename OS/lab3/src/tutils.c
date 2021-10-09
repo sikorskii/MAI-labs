@@ -5,10 +5,11 @@
 #include <pthread.h>
 #include "../headers/tutils.h"
 
-void createThreads(int threads_num, pthread_t *threads, void *func) {
+
+void createThreads(int threads_num, pthread_t *threads, void *func, arg_t *targs) {
     for (int i = 0; i < threads_num; i++) {
 
-        if (pthread_create(&threads[i], NULL, func, NULL) != 0) {
+        if (pthread_create(&threads[i], NULL, func, (void*)&targs[i]) != 0) {
 
             printf("Unable to create %d-th thread\n", i);
             exit(1);

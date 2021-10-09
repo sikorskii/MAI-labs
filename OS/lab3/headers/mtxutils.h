@@ -34,6 +34,6 @@ void printMatrix(mtx* matrix);
 
 void cleanMatrix(mtx* matrix);
 
-int calculateDet(mtx* matrix);
+int calculateDet(mtx* matrix, int leftBound, int rightBound);
 
 #endif //LAB3_MTXUTILS_H
