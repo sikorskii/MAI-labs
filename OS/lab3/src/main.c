@@ -12,8 +12,6 @@ void *func(void *args) {
     printf("This is thread %lu\n", pthread_self());
     printf("My matrix size is %d, my right bound is %d\n", args_s->matrix->size, args_s->right_bound);
     args_s->result = calculateDet(args_s->matrix, args_s->left_bound, args_s->right_bound);
-    //free(args_s);
-    //return NULL;
     pthread_exit(NULL);
 }
 
@@ -85,19 +83,18 @@ signed main(signed argc, char** argv) {
     long long ans = 0;
     int degree = 1;
     for (int i = 0; i < threads_num; i++) {
-        ans += degree * thread_args[i].result;
-        degree = -degree;
-        printf("ans i = %d\n", thread_args[i].result);
+        ans += thread_args[i].result;
+        printf("ans i = %lld\n", thread_args[i].result);
     }
     free(thread_args);
 
     for (int i = 0; i < matrix.size; i++) {
-        mtx newMatrix = getReducedMatrix(&matrix, i, 0);
+        mtx newMatrix = getReducedMatrix(&matrix, 0, i);
         //printMatrix(&newMatrix);
         cleanMatrix(&newMatrix);
     }
 
-    printf("Calcucated det is: %d\n", calculateDet(&matrix, 0, matrix.size));
+    printf("Calcucated det is: %lld\n", calculateDet(&matrix, 0, matrix.size));
     printf("Multithreading result is %lld\n", ans);
 
     cleanMatrix(&matrix);

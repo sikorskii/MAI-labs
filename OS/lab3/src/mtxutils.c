@@ -101,25 +101,19 @@ mtx getEmptyMatrix(int n) {
 
 }
 
-mtx getReducedMatrix(mtx *matrix, int column, int row) {
-    int offsetRow = 0;
-    int offsetColumn = 0;
+mtx getReducedMatrix(mtx *matrix, int i, int j) {
 
     mtx newMatrix = getEmptyMatrix(matrix->size - 1);
 
-    for (int i = 0; i < matrix->size - 1; i++) {
+    for (int a = 0, x = 0; a < matrix->size - 1; a++, x++) {
+        for (int b = 0, y = 0; b < matrix->size - 1; b++, y++) {
 
-        if (i == row) {
-            offsetRow++;
-        }
+            if (x == i)
+                x++;
+            if (y == j)
+                y++;
 
-        offsetColumn = 0;
-        for (int j = 0; j < matrix->size - 1; j++) {
-            if (j == column) {
-                offsetColumn++;
-            }
-
-            newMatrix.matrix[i][j] = matrix->matrix[i + offsetRow][j + offsetColumn];
+            newMatrix.matrix[a][b] = matrix->matrix[x][y];
         }
     }
 
@@ -149,12 +143,40 @@ void cleanMatrix(mtx* matrix) {
     free(matrix->matrix);
 }
 
-int calculateDet(mtx* matrix, int leftBound, int rightBound) {
-    int det = 0;
-    int degree = (int)pow(-1, leftBound);
+long basicDeterminant(mtx *matrix) {
 
-    int lb = leftBound;
-    int rb = rightBound;
+    long long d = 0;
+
+    if (matrix->size == 2) {
+        return matrix->matrix[0][0] * matrix->matrix[1][1]
+            - matrix->matrix[0][1] * matrix->matrix[1][0];
+    }
+
+    for (int i = 0; i < matrix->size; i++)
+        d += calculateMinor(i, 0, matrix->matrix[i][0], matrix);
+
+    return d;
+}
+
+long long calculateMinor(int i, int j, int a, mtx* matrix) {
+    int degree;
+    mtx submatrix = getReducedMatrix(matrix, i, 0);
+
+    if ((i + j) % 2 == 0)
+        degree = 1;
+    else
+        degree = -1;
+
+    long det = degree * a * basicDeterminant(&submatrix);
+
+    cleanMatrix(&submatrix);
+
+    return det;
+}
+
+long long calculateDet(mtx* matrix, int leftBound, int rightBound) {
+    long long det = 0;
+    int degree = 1;
 
     if(matrix->size == 1) {
         return matrix->matrix[0][0];
@@ -167,14 +189,10 @@ int calculateDet(mtx* matrix, int leftBound, int rightBound) {
     else {
         mtx newMatrix;
 
-        for(int j = leftBound; j <= rightBound; j++) {
+        for(int j = leftBound; j < rightBound; j++) {
 
-            newMatrix = getReducedMatrix(matrix, j, 0);
-
-
-            det = det + (degree * matrix->matrix[0][j] * calculateDet(&newMatrix, leftBound, rightBound));
-            degree = -degree;
-            cleanMatrix(&newMatrix);
+            long temp = calculateMinor(j, 0, matrix->matrix[j][0], matrix);
+            det += temp;
         }
     }
 

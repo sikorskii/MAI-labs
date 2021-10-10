@@ -28,12 +28,14 @@ mtx getMatrix();
 
 mtx getEmptyMatrix(int n);
 
-mtx getReducedMatrix(mtx *matrix, int column, int row);
+mtx getReducedMatrix(mtx *matrix, int i, int j);
 
 void printMatrix(mtx* matrix);
 
 void cleanMatrix(mtx* matrix);
 
-int calculateDet(mtx* matrix, int leftBound, int rightBound);
+long long calculateMinor(int i, int j, int a, mtx* matrix);
+
+long long calculateDet(mtx* matrix, int leftBound, int rightBound);
 
 #endif //LAB3_MTXUTILS_H

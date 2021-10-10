@@ -11,7 +11,7 @@ typedef struct arguments {
     mtx *matrix;
     int left_bound;
     int right_bound;
-    int result;
+    long long result;
 } arg_t;
 
 typedef struct{
