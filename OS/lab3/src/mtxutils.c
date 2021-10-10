@@ -1,13 +1,9 @@
 //
 // Created by aldes on 02.10.2021.
 //
-
-#include <math.h>
 #include "../headers/mtxutils.h"
 
-#define MAX_ELEMENT 5
-
-
+#define MAX_ELEMENT 100
 
 int getRandInt() {
     return rand() % MAX_ELEMENT;

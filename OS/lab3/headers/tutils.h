@@ -6,6 +6,7 @@
 #define LAB3_TUTILS_H
 #include "mtxutils.h"
 
+void *func(void *args);
 
 typedef struct arguments {
     mtx *matrix;

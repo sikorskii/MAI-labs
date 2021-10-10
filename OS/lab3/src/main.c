@@ -1,19 +1,13 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #include "../headers/mtxutils.h"
 #include "../headers/tutils.h"
 
 
 
-void *func(void *args) {
-    arg_t *args_s = (arg_t*) args;
-    printf("This is thread %lu\n", pthread_self());
-    printf("My matrix size is %d, my right bound is %d\n", args_s->matrix->size, args_s->right_bound);
-    args_s->result = calculateDet(args_s->matrix, args_s->left_bound, args_s->right_bound);
-    pthread_exit(NULL);
-}
 
 signed main(signed argc, char** argv) {
 
@@ -49,7 +43,6 @@ signed main(signed argc, char** argv) {
 
     arg_t *thread_args = calloc(threads_num, sizeof(arg_t));
 
-    arg_t testarg = {&matrix, 10, 10, 333};
 
     for (int i = 0; i < threads_num; i++) {
         thread_args[i].matrix = &matrix;
@@ -61,9 +54,8 @@ signed main(signed argc, char** argv) {
     thread_args[threads_num - 1].left_bound = (threads_num - 1) * columnsPerThread;
     thread_args[threads_num - 1].right_bound = matrix.size;
 
-    for (int i = 0; i < threads_num; i++) {
-        //printf("size %d left %d right %d\n", thread_args[i].matrix->size, thread_args[i].left_bound, thread_args[i].right_bound);
-    }
+    struct timeval stop, start;
+    gettimeofday(&start, NULL);
 
     for (int i = 0; i < threads_num; i++) {
 
@@ -81,21 +73,18 @@ signed main(signed argc, char** argv) {
     joinThreads(threads_num, threads);
 
     long long ans = 0;
-    int degree = 1;
     for (int i = 0; i < threads_num; i++) {
         ans += thread_args[i].result;
-        printf("ans i = %lld\n", thread_args[i].result);
+        printf("ans %d = %lld\n",i, thread_args[i].result);
     }
     free(thread_args);
 
-    for (int i = 0; i < matrix.size; i++) {
-        mtx newMatrix = getReducedMatrix(&matrix, 0, i);
-        //printMatrix(&newMatrix);
-        cleanMatrix(&newMatrix);
-    }
 
-    printf("Calcucated det is: %lld\n", calculateDet(&matrix, 0, matrix.size));
     printf("Multithreading result is %lld\n", ans);
+
+    gettimeofday(&stop, NULL);
+    printf("took %lu mcs\n", (stop.tv_sec - start.tv_sec) * 100000 + stop.tv_usec - start.tv_usec);
+
 
     cleanMatrix(&matrix);
 
