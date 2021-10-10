@@ -6,9 +6,6 @@
 #include "../headers/mtxutils.h"
 #include "../headers/tutils.h"
 
-
-
-
 signed main(signed argc, char** argv) {
 
     if (argc != 2) {
@@ -57,18 +54,8 @@ signed main(signed argc, char** argv) {
     struct timeval stop, start;
     gettimeofday(&start, NULL);
 
-    for (int i = 0; i < threads_num; i++) {
 
-        if (pthread_create(&threads[i], NULL, func, (void*)&thread_args[i]) != 0) {
-
-            printf("Unable to create %d-th thread\n", i);
-            exit(1);
-
-        }
-
-    }
-
-    //createThreads(threads_num, threads, &func, thread_args);
+    createThreads(threads_num, threads, &func, thread_args);
 
     joinThreads(threads_num, threads);
 

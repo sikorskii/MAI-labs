@@ -3,7 +3,7 @@
 //
 #include "../headers/mtxutils.h"
 
-#define MAX_ELEMENT 100
+#define MAX_ELEMENT 10
 
 int getRandInt() {
     return rand() % MAX_ELEMENT;
@@ -187,7 +187,7 @@ long long calculateDet(mtx* matrix, int leftBound, int rightBound) {
 
         for(int j = leftBound; j < rightBound; j++) {
 
-            long temp = calculateMinor(j, 0, matrix->matrix[j][0], matrix);
+            long long temp = calculateMinor(j, 0, matrix->matrix[j][0], matrix);
             det += temp;
         }
     }
