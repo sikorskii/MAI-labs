@@ -172,7 +172,7 @@ long long calculateMinor(int i, int j, int a, mtx* matrix) {
 
 long long calculateDet(mtx* matrix, int leftBound, int rightBound) {
     long long det = 0;
-    int degree = 1;
+
 
     if(matrix->size == 1) {
         return matrix->matrix[0][0];
@@ -183,7 +183,6 @@ long long calculateDet(mtx* matrix, int leftBound, int rightBound) {
                 - matrix->matrix[0][1] * matrix->matrix[1][0];
     }
     else {
-        mtx newMatrix;
 
         for(int j = leftBound; j < rightBound; j++) {
 
