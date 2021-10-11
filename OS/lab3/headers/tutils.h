@@ -15,10 +15,6 @@ typedef struct arguments {
     long long result;
 } arg_t;
 
-typedef struct{
-    mtx matrix;
-    int bound;
-} args;
 
 void createThreads(int threads_num, pthread_t *threads, void *func, arg_t * targs);
 

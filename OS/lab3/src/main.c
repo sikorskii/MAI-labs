@@ -64,13 +64,16 @@ signed main(signed argc, char** argv) {
         ans += thread_args[i].result;
         printf("ans %d = %lld\n",i, thread_args[i].result);
     }
+
+    gettimeofday(&stop, NULL);
+    printf("took %lu mcs\n", (stop.tv_sec - start.tv_sec) * 100000 + stop.tv_usec - start.tv_usec);
+
     free(thread_args);
 
 
     printf("Multithreading result is %lld\n", ans);
 
-    gettimeofday(&stop, NULL);
-    printf("took %lu mcs\n", (stop.tv_sec - start.tv_sec) * 100000 + stop.tv_usec - start.tv_usec);
+
 
 
     cleanMatrix(&matrix);
