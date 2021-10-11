@@ -56,28 +56,25 @@ signed main(signed argc, char** argv) {
     struct timeval stop, start;
     gettimeofday(&start, NULL);
 
-
     createThreads(threads_num, threads, &func, thread_args);
 
     joinThreads(threads_num, threads);
 
     long long ans = 0;
+
     for (int i = 0; i < threads_num; i++) {
         ans += thread_args[i].result;
         printf("ans %d = %lld\n",i, thread_args[i].result);
     }
 
     gettimeofday(&stop, NULL);
+
     printf("took %lu mcs\n", (stop.tv_sec - start.tv_sec) *
         100000 + stop.tv_usec - start.tv_usec);
 
     free(thread_args);
 
-
     printf("Multithreading result is %lld\n", ans);
-
-
-
 
     cleanMatrix(&matrix);
 
