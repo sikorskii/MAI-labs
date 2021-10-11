@@ -102,6 +102,7 @@ mtx getReducedMatrix(mtx *matrix, int i, int j) {
     mtx newMatrix = getEmptyMatrix(matrix->size - 1);
 
     for (int a = 0, x = 0; a < matrix->size - 1; a++, x++) {
+
         for (int b = 0, y = 0; b < matrix->size - 1; b++, y++) {
 
             if (x == i)
@@ -118,7 +119,9 @@ mtx getReducedMatrix(mtx *matrix, int i, int j) {
 }
 
 void printMatrix(mtx *matrix) {
-    printf("-----------------Matrix %d by %d-----------------\n", matrix->size, matrix->size);
+    printf("-----------------Matrix %d by %d-----------------\n",
+            matrix->size, matrix->size);
+
     for (int i = 0; i < matrix->size; i++) {
 
         for (int j = 0; j < matrix->size; j++){

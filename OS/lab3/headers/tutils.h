@@ -16,7 +16,8 @@ typedef struct arguments {
 } arg_t;
 
 
-void createThreads(int threads_num, pthread_t *threads, void *func, arg_t * targs);
+void createThreads(int threads_num, pthread_t *threads,
+                   void *func, arg_t * targs);
 
 void joinThreads(int threads_num, pthread_t *threads);
 

@@ -45,10 +45,12 @@ signed main(signed argc, char** argv) {
         thread_args[i].matrix = &matrix;
         thread_args[i].result = 0;
         thread_args[i].left_bound = i * columnsPerThread;
-        thread_args[i].right_bound = thread_args[i].left_bound + columnsPerThread;
+        thread_args[i].right_bound = thread_args[i].left_bound
+                + columnsPerThread;
     }
 
-    thread_args[threads_num - 1].left_bound = (threads_num - 1) * columnsPerThread;
+    thread_args[threads_num - 1].left_bound = (threads_num - 1)
+            * columnsPerThread;
     thread_args[threads_num - 1].right_bound = matrix.size;
 
     struct timeval stop, start;
@@ -66,7 +68,8 @@ signed main(signed argc, char** argv) {
     }
 
     gettimeofday(&stop, NULL);
-    printf("took %lu mcs\n", (stop.tv_sec - start.tv_sec) * 100000 + stop.tv_usec - start.tv_usec);
+    printf("took %lu mcs\n", (stop.tv_sec - start.tv_sec) *
+        100000 + stop.tv_usec - start.tv_usec);
 
     free(thread_args);
 
