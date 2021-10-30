@@ -6,8 +6,9 @@
 #include <cstring>
 #include <cstdlib>
 #include <unistd.h>
-// 0 - reading
-// 1 - writing
+
+#include "mem.h"
+
 void reverse(char *str) {
     int i = 0;
     int j = (int)strlen(str) - 1;
@@ -22,23 +23,25 @@ void reverse(char *str) {
 }
 
 int main(int argc, char* argv[]) {
+
+    const int MAX_STRING_LENTGH = 50;
+
     printf("\ni am child and i will write in file %s\n", argv[1]);
 
-    int fd[2];
-    fd[0] = (int) strtol(argv[2], nullptr, 10);
-    fd[1] = (int) strtol(argv[3], nullptr, 10);
+    int fileDescriptor = (int) strtol(argv[2], nullptr, 10);
 
     FILE *fp = fopen(argv[1], "w");
     fprintf(fp, "child been here\n");
+    fprintf(fp, "my descriptor is %d\n", fileDescriptor);
 
-    close(fd[1]);
-    char buf[50];
+    char buf[MAX_STRING_LENTGH] = "cringe";
 
-    while(read(fd[0], buf, sizeof(buf)) != 0) {
+    while(true /*read from shared here*/) {
         reverse(buf);
         //printf("Recieved : %s\n", buf);
         fprintf(fp, "Received string: %s\n", buf);
         fflush(fp);
+        break; //uncomment this
     }
 
     fclose(fp);
