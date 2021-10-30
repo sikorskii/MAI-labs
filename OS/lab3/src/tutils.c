@@ -22,6 +22,8 @@ void createThreads(int threads_num, pthread_t *threads, void *func, arg_t *targs
         if (pthread_create(&threads[i], NULL, func, (void*)&targs[i]) != 0) {
 
             printf("Unable to create %d-th thread\n", i);
+            free(threads);
+            free(targs);
             exit(1);
 
         }
@@ -35,6 +37,7 @@ void joinThreads(int threads_num, pthread_t *threads) {
         if (pthread_join(threads[i], NULL) != 0) {
 
             printf("Unable to join %d-th thread\n", i);
+            free(threads);
             exit(1);
 
         }
