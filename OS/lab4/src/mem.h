@@ -9,6 +9,8 @@
 
 const char *file1 = "sharedFile1";
 const char *file2 = "sharedFile2";
+const char *sem1 = "sem1";
+const char *sem2 = "sem2";
 
 unsigned accessPerms = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
 

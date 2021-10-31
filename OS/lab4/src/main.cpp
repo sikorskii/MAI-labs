@@ -2,10 +2,6 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
-#include <sys/mman.h>
-#include <semaphore.h>
-
-#include "mem.h"
 
 // 0 - reading
 // 1 - writing
@@ -13,26 +9,14 @@
 
 int main() {
 
-    const int MAX_STRING_LENTGH = 50;
+    int pipe1[2];
+    int pipe2[2];
 
-    int mapDescriptor1 = shm_open(file1, O_RDWR | O_CREAT, accessPerms);
-    if (mapDescriptor1 < 0) {
-        printf("cant open shared memory file");
-        exit(1);
+    if (pipe(pipe1) == -1 || pipe(pipe2) == -1) {
+        perror("Pipe error!");
     }
 
-    int mapDescriptor2 = shm_open(file2, O_RDWR | O_CREAT, accessPerms);
-    if (mapDescriptor2 < 0) {
-        printf("cant open shared memory file");
-        exit(1);
-    }
-
-    ftruncate(mapDescriptor1, MAX_STRING_LENTGH * sizeof(char));
-    ftruncate(mapDescriptor2, MAX_STRING_LENTGH * sizeof(char));
-
-    printf("map1: %d, map2: %d\n", mapDescriptor1, mapDescriptor2);
-
-    char buf[MAX_STRING_LENTGH];
+    char buf[50];
 
     char *filename1;
     char *filename2;
@@ -49,8 +33,14 @@ int main() {
 
     pid_t child1_pid, child2_pid;
 
+    if (pipe(pipe1) == -1) {
+        perror("Pipe error!");
+    }
+
     char *toc1;
-    asprintf(&toc1, "%d", mapDescriptor1);
+    char *toc2;
+    asprintf(&toc1, "%d", pipe1[0]);
+    asprintf(&toc2, "%d", pipe1[1]);
 
 
     child1_pid = fork();
@@ -63,7 +53,7 @@ int main() {
 
         printf("[%d] It's child1\n", getpid());
         fflush(stdout);
-        execl("child1.out", "child1", filename1, toc1, NULL); //execution of child1's program begins here
+        execl("child1.out", "child1", filename1, toc1, toc2, NULL); //execution of child1's program begins here
 
     }
 
@@ -72,8 +62,14 @@ int main() {
         printf("[%d] It's parent. Child id: %d\n", getpid(), child1_pid);
         fflush(stdout);
 
+        if (pipe(pipe2) == -1) {
+            perror("Pipe error!");
+        }
+
         char *toc11;
-        asprintf(&toc11, "%d", mapDescriptor2);
+        char *toc22;
+        asprintf(&toc11, "%d", pipe2[0]);
+        asprintf(&toc22, "%d", pipe2[1]);
 
         child2_pid = fork();
 
@@ -85,7 +81,7 @@ int main() {
 
             printf("[%d] It's child2\n", getpid());
             fflush(stdout);
-            execl("child1.out", "child2", filename2, toc11, NULL); //execution of child2's program begins here
+            execl("child1.out", "child2", filename2, toc11, toc22, NULL); //execution of child2's program begins here
 
         }
 
@@ -94,12 +90,14 @@ int main() {
         free(filename1);
         free(filename2);
         free(toc1);
+        free(toc2);
         free(toc11);
+        free(toc22);
 
         char *str;
 
         while (true) {
-            char c[MAX_STRING_LENTGH];
+            char c[50];
             str = fgets (c, sizeof(c), stdin);
 
             if(strlen(c) == 1)
@@ -108,13 +106,14 @@ int main() {
             if (str == nullptr)
                 break;
 
-
+            close(pipe1[0]);
+            close(pipe2[0]);
 
             if ((strlen(c) - 1) % 2 == 0) {
-                //write to the fileDescriptor2 here
+                write(pipe2[1], c, strlen(c) + 1);
             }
             else {
-                //write to the fileDescriptor1 here
+                write(pipe1[1], c, strlen(c) + 1);
             }
 
         }
