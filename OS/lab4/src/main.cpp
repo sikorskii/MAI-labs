@@ -2,21 +2,15 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+#include <semaphore.h>
+#include <sys/mman.h>
 
-// 0 - reading
-// 1 - writing
-//MAX STRING LENGTH IS 50
+
+#include "mem.h"
 
 int main() {
 
-    int pipe1[2];
-    int pipe2[2];
-
-    if (pipe(pipe1) == -1 || pipe(pipe2) == -1) {
-        perror("Pipe error!");
-    }
-
-    char buf[50];
+    char buf[MAX_LENGTH];
 
     char *filename1;
     char *filename2;
@@ -33,27 +27,58 @@ int main() {
 
     pid_t child1_pid, child2_pid;
 
-    if (pipe(pipe1) == -1) {
-        perror("Pipe error!");
-    }
+    sem_t *firstSem = sem_open(sem1, O_CREAT, 0644, 0);
+    sem_t *firstSemOut = sem_open(sem11, O_CREAT, 0644, 0);
+    sem_t *secondSem = sem_open(sem2, O_CREAT, 0644, 0);
+    sem_t *secondSemOut = sem_open(sem22, O_CREAT, 0644, 0);
 
-    char *toc1;
-    char *toc2;
-    asprintf(&toc1, "%d", pipe1[0]);
-    asprintf(&toc2, "%d", pipe1[1]);
+    int fd1 = shm_open(file1,
+                      O_RDWR | O_CREAT,
+                      accessPerms);
+
+    ftruncate(fd1, NUMBER_OF_BYTES);
+    if (fd1 < 0)
+        handleError("fd1 create error");
+
+    caddr_t memptr1 = static_cast<caddr_t>(mmap(NULL,       /* let system pick where to put segment */
+                                               NUMBER_OF_BYTES,   /* how many bytes */
+                                               PROT_READ | PROT_WRITE, /* access protections */
+                                               MAP_SHARED, /* mapping visible to other processes */
+                                               fd1,         /* file descriptor */
+                                               0));
+
+    if (memptr1 == (caddr_t)-1)
+        handleError("memptr1 mapping error");
+
+    int fd2 = shm_open(file2,
+                       O_RDWR | O_CREAT,
+                       accessPerms);
+
+    ftruncate(fd2, NUMBER_OF_BYTES);
+    if (fd2 < 0)
+        handleError("fd2 create error");
+
+    caddr_t memptr2 = static_cast<caddr_t>(mmap(NULL,       /* let system pick where to put segment */
+                                                NUMBER_OF_BYTES,   /* how many bytes */
+                                                PROT_READ | PROT_WRITE, /* access protections */
+                                                MAP_SHARED, /* mapping visible to other processes */
+                                                fd2,         /* file descriptor */
+                                                0));
+    if (memptr2 == (caddr_t)-1)
+        handleError("memptr2 mapping error");
 
 
     child1_pid = fork();
 
-    if (child1_pid == -1) {
-        printf("fork error!\n");
-    }
+    if (child1_pid == -1)
+        handleError("fork error");
+
 
     else if (child1_pid == 0) { //child1
 
         printf("[%d] It's child1\n", getpid());
         fflush(stdout);
-        execl("child1.out", "child1", filename1, toc1, toc2, NULL); //execution of child1's program begins here
+        execl("child1.out", "child1", filename1, sem1, sem11, file1, NULL); //execution of child1's program begins here
 
     }
 
@@ -62,26 +87,16 @@ int main() {
         printf("[%d] It's parent. Child id: %d\n", getpid(), child1_pid);
         fflush(stdout);
 
-        if (pipe(pipe2) == -1) {
-            perror("Pipe error!");
-        }
-
-        char *toc11;
-        char *toc22;
-        asprintf(&toc11, "%d", pipe2[0]);
-        asprintf(&toc22, "%d", pipe2[1]);
-
         child2_pid = fork();
 
-        if (child2_pid == -1) { //error
-            printf("fork error!\n");
-        }
+        if (child2_pid == -1)
+            handleError("fork 2 error");
 
         else if (child2_pid == 0) { //child2
 
             printf("[%d] It's child2\n", getpid());
             fflush(stdout);
-            execl("child1.out", "child2", filename2, toc11, toc22, NULL); //execution of child2's program begins here
+            execl("child1.out", "child2", filename2, sem2, sem22, file2, NULL); //execution of child2's program begins here
 
         }
 
@@ -89,35 +104,59 @@ int main() {
 
         free(filename1);
         free(filename2);
-        free(toc1);
-        free(toc2);
-        free(toc11);
-        free(toc22);
 
         char *str;
 
+
         while (true) {
             char c[50];
-            str = fgets (c, sizeof(c), stdin);
+            str = fgets(c, sizeof(c), stdin);
 
-            if(strlen(c) == 1)
+            if (strlen(c) == 1)
                 continue;
 
             if (str == nullptr)
                 break;
 
-            close(pipe1[0]);
-            close(pipe2[0]);
-
             if ((strlen(c) - 1) % 2 == 0) {
-                write(pipe2[1], c, strlen(c) + 1);
-            }
-            else {
-                write(pipe1[1], c, strlen(c) + 1);
-            }
+                strcpy(memptr1, c);
+                //sleep(2);
+                printf("Parent opens first sem\n");
+                sem_post(firstSem);
+                sem_wait(firstSemOut);
 
+
+            } else {
+                strcpy(memptr2, c);
+                //sleep(2);
+                printf("Parent opens second sem\n");
+                sem_post(secondSem);
+                sem_wait(secondSemOut);
+            }
         }
+        char c[2] = "\0";
 
+        strcpy(memptr1, c);
+        sem_post(firstSem);
+        sem_wait(firstSemOut);
+
+        strcpy(memptr2, c);
+        sem_post(secondSem);
+        sem_wait(secondSemOut);
+
+        munmap(memptr1, NUMBER_OF_BYTES);
+        munmap(memptr2, NUMBER_OF_BYTES);
+
+        close(fd1);
+        close(fd2);
+
+        sem_close(firstSem);
+        sem_close(firstSemOut);
+        sem_close(secondSem);
+        sem_close(secondSemOut);
+
+        shm_unlink(file1);
+        shm_unlink(file2);
         return 0;
     }
 }

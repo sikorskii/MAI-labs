@@ -6,6 +6,10 @@
 #include <cstring>
 #include <cstdlib>
 #include <unistd.h>
+#include <semaphore.h>
+#include <sys/mman.h>
+#include "mem.h"
+
 // 0 - reading
 // 1 - writing
 void reverse(char *str) {
@@ -24,22 +28,52 @@ void reverse(char *str) {
 int main(int argc, char* argv[]) {
     printf("\ni am child and i will write in file %s\n", argv[1]);
 
-    int fd[2];
-    fd[0] = (int) strtol(argv[2], nullptr, 10);
-    fd[1] = (int) strtol(argv[3], nullptr, 10);
 
     FILE *fp = fopen(argv[1], "w");
     fprintf(fp, "child been here\n");
 
-    close(fd[1]);
     char buf[50];
 
-    while(read(fd[0], buf, sizeof(buf)) != 0) {
-        reverse(buf);
-        //printf("Recieved : %s\n", buf);
-        fprintf(fp, "Received string: %s\n", buf);
-        fflush(fp);
+    sem_t *sem = sem_open(argv[2], 0);
+    sem_t *semOut = sem_open(argv[3], 0);
+
+    int fd = shm_open(argv[4], O_RDWR, accessPerms);
+    if (fd < 0)
+        handleError("child fd error");
+
+    char* memptr = static_cast<char*>(mmap(NULL,
+                                               NUMBER_OF_BYTES,
+                                               PROT_READ | PROT_WRITE,
+                                               MAP_SHARED,
+                                               fd,
+                                               0));
+    if (memptr == (char*)-1)
+        handleError("child memptr error");
+
+    while (true) {
+        if(!sem_wait(sem)) {
+            printf("%d sem opened!\n", getpid());
+
+            if (strcmp(memptr, "\0") == 0)
+                break;
+
+            reverse(memptr);
+            printf("reversed: %s\n", memptr);
+            fprintf(fp, "Got and reversed from shared memory:");
+            fprintf(fp, memptr);
+            fprintf(fp, "\n");
+            printf("%d inside\n", getpid());
+            sem_post(semOut);
+        }
     }
+    printf("%d is about to end his work\n", getpid());
+    sem_post(semOut);
+
+    munmap(memptr, NUMBER_OF_BYTES);
+    close(fd);
+    sem_close(sem);
+    sem_close(semOut);
+    unlink(argv[4]);
 
     fclose(fp);
     return 0;
