@@ -40,11 +40,11 @@ int main() {
     if (fd1 < 0)
         handleError("fd1 create error");
 
-    caddr_t memptr1 = static_cast<caddr_t>(mmap(NULL,       /* let system pick where to put segment */
-                                               NUMBER_OF_BYTES,   /* how many bytes */
-                                               PROT_READ | PROT_WRITE, /* access protections */
-                                               MAP_SHARED, /* mapping visible to other processes */
-                                               fd1,         /* file descriptor */
+    caddr_t memptr1 = static_cast<caddr_t>(mmap(NULL,
+                                               NUMBER_OF_BYTES,
+                                               PROT_READ | PROT_WRITE,
+                                               MAP_SHARED,
+                                               fd1,
                                                0));
 
     if (memptr1 == (caddr_t)-1)
@@ -58,11 +58,11 @@ int main() {
     if (fd2 < 0)
         handleError("fd2 create error");
 
-    caddr_t memptr2 = static_cast<caddr_t>(mmap(NULL,       /* let system pick where to put segment */
-                                                NUMBER_OF_BYTES,   /* how many bytes */
-                                                PROT_READ | PROT_WRITE, /* access protections */
-                                                MAP_SHARED, /* mapping visible to other processes */
-                                                fd2,         /* file descriptor */
+    caddr_t memptr2 = static_cast<caddr_t>(mmap(NULL,
+                                                NUMBER_OF_BYTES,
+                                                PROT_READ | PROT_WRITE,
+                                                MAP_SHARED,
+                                                fd2,
                                                 0));
     if (memptr2 == (caddr_t)-1)
         handleError("memptr2 mapping error");
