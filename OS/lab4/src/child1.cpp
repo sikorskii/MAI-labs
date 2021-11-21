@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
                                                MAP_SHARED,
                                                fd,
                                                0));
-    if (memptr == (char*)-1)
+    if (memptr == MAP_FAILED)
         handleError("child memptr error");
 
     while (true) {

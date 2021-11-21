@@ -12,6 +12,7 @@ int main() {
 
     char buf[MAX_LENGTH];
 
+
     char *filename1;
     char *filename2;
 
@@ -47,7 +48,7 @@ int main() {
                                                fd1,
                                                0));
 
-    if (memptr1 == (caddr_t)-1)
+    if (memptr1 == MAP_FAILED)
         handleError("memptr1 mapping error");
 
     int fd2 = shm_open(file2,
@@ -64,7 +65,7 @@ int main() {
                                                 MAP_SHARED,
                                                 fd2,
                                                 0));
-    if (memptr2 == (caddr_t)-1)
+    if (memptr2 == MAP_FAILED)
         handleError("memptr2 mapping error");
 
 
@@ -112,7 +113,7 @@ int main() {
             char c[50];
             str = fgets(c, sizeof(c), stdin);
 
-            if (strlen(c) == 1)
+            if (strlen(c) == 0)
                 continue;
 
             if (str == nullptr)

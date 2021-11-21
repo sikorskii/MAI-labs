@@ -2,9 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(lab1)
 
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_XCODE_GENERATE_SCHEME ON)
-set(CMAKE_XCODE_SCHEME_ADDRESS_SANITIZER ON)
-set(CMAKE_XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN ON)
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
 
 add_executable(lab4.out
         src/main.cpp)#src/example.cpp)
