@@ -78,7 +78,6 @@ double parseAndPerform(char* query) {
             firstArg = strtok(NULL, " \n\0");
         }
         //printf("first arg %d\n", first);
-        printf("stat function begin\n");
         return calculatePI(first);
     }
 
