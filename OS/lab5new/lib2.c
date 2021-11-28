@@ -1,9 +1,8 @@
 //
-// Created by aldes on 21.11.2021.
+// Created by aldes on 28.11.2021.
 //
 
-#include "../headers/operations.h"
-#include "math.h"
+#include "lib2.h"
 
 double integrateSin(double leftBound, double rightBound, double step) {
     double sinNumeric = 0;

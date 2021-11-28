@@ -1,12 +1,12 @@
 //
-// Created by aldes on 21.11.2021.
+// Created by aldes on 28.11.2021.
 //
 
-#ifndef LAB5_OPERATIONS_H
-#define LAB5_OPERATIONS_H
+#ifndef LAB5NEW_LIB2_H
+#define LAB5NEW_LIB2_H
 
 double integrateSin(double leftBound, double rightBound, double step);
 
 double calculatePI(int seriesLength);
 
-#endif //LAB5_OPERATIONS_H
+#endif //LAB5NEW_LIB2_H

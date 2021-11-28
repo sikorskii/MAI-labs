@@ -1,9 +1,9 @@
 //
-// Created by aldes on 18.11.2021.
+// Created by aldes on 28.11.2021.
 //
-#include <math.h>
 
-#include "mathHeader.h"
+#include "lib1.h"
+#include <math.h>
 
 double integrateSin(double leftBound, double rightBound, double step) {
     double sinNumeric = 0;
@@ -30,4 +30,3 @@ double calculatePI(int seriesLength) {
 
     return 4 * PI;
 }
-

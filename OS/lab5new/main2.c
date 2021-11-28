@@ -1,14 +1,10 @@
 //
-// Created by aldes on 21.11.2021.
+// Created by aldes on 28.11.2021.
 //
 
-#include <regex.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-
-#include "../headers/api.h"
-#include "../../private/headers/operations.h"
+#include "lib1.h"
 
 double parseAndPerform(char* query) {
     int typeOfQuery;
@@ -22,13 +18,13 @@ double parseAndPerform(char* query) {
         double first;
         sscanf(firstArg, "%lf", &first);
         char* secondArg = strtok(NULL, " ");
-            if (secondArg == NULL)
-                return 0;
+        if (secondArg == NULL)
+            return 0;
         double second;
         sscanf(secondArg, "%lf", &second);
         char* thirdArg = strtok(NULL, " ");
-            if (thirdArg == NULL)
-                return 0;
+        if (thirdArg == NULL)
+            return 0;
         double third;
         sscanf(thirdArg, "%lf", &third);
         while (thirdArg != NULL) {
@@ -49,15 +45,22 @@ double parseAndPerform(char* query) {
             firstArg = strtok(NULL, " \n\0");
         }
         //printf("first arg %d\n", first);
+        printf("stat function begin\n");
         return calculatePI(first);
-    } else {
+    }
+    else {
         printf("invalid query, 0 returned\n");
         return 0;
     }
 
 }
 
-
-double compute(char* query) {
-    return parseAndPerform(query);
+int main() {
+    char queryBuf[100];
+    printf("enter query:\n");
+    while (fgets(queryBuf, 100, stdin) != NULL) {
+        printf("calculated %lf\n", parseAndPerform(queryBuf));
+        printf("enter query:\n");
+    }
 }
+
