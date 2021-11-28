@@ -2,7 +2,8 @@
 // Created by aldes on 28.11.2021.
 //
 
-#include "lib2.h"
+#include "lib1.h"
+#include <math.h>
 
 double integrateSin(double leftBound, double rightBound, double step) {
     double sinNumeric = 0;
