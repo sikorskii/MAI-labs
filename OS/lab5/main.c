@@ -100,5 +100,6 @@ int main() {
         printf("calculated %lf\n", parseAndPerform(queryBuf));
         printf("enter query:\n");
     }
+    firstLib ? dlclose(path1) : dlclose(path2);
 }
 
