@@ -7,6 +7,8 @@
 
 
 #include <set>
+#include <mutex>
+#include <condition_variable>
 
 #include "ServerNode.h"
 #include "AbstractNode.h"
@@ -17,6 +19,11 @@
 
 class SpringBootApplication : public AbstractNode{
 public:
+
+    SpringBootApplication() : AbstractNode(-1), created(true) {
+        serversId.insert(-1);
+    }
+
     void run() {
         std::thread([this]() {inputProcessing();}).detach();
         std::thread([this]() {messageProcessing();}).detach();
@@ -25,10 +32,12 @@ public:
 
 private:
     std::set<int> serversId;
+    std::mutex creationLock;
+    std::condition_variable creationalCondition;
+    bool created;
 
     void inputProcessing() {
         std::string command;
-
         zmq::socket_t toMessageProcessor(context, zmq::socket_type::push);
         toMessageProcessor.connect(ZmqUtils::MESSAGE_PROCESSOR_URL);
 
@@ -36,21 +45,24 @@ private:
             std::cin >> command;
             if (command == "test") {
                 Message message = MessageBuilder::buildTestMessage();
-                std::cout << "message created with size: " << message.sizeOfBody << std::endl;
+                //std::cout << "message created with size: " << message.sizeOfBody << std::endl;
+                message.sendMessage(toMessageProcessor);
+            }
+            if (command == "create") {
+                Message message = MessageBuilder::buildCreateMessage();
                 message.sendMessage(toMessageProcessor);
             }
             if (command == "exit") {
                 Message message = MessageBuilder::buildExitMessage();
-                std::cout << "exit message created\n";
+                //std::cout << "exit message created\n";
                 message.sendMessage(toMessageProcessor);
                 return;
             }
             if (command == "exec") {
                 Message message = MessageBuilder::buildExecMessage();
-                MessageData data = MessageBuilder::deserialize(message.body);
-                std::cout << "exec message created with pattern = " << data.data[1] << std::endl;
                 message.sendMessage(toMessageProcessor);
             }
+
         }
 
     }
@@ -71,10 +83,10 @@ private:
                     toSend.sendMessage(toOutput);
                     break;
                 case MessageTypes::CREATE_REQUEST:
+                    toSend = processCreateMessage(receivedMessage);
                     break;
                 case MessageTypes::EXEC_REQUEST:
-                    data = MessageBuilder::deserialize(receivedMessage.body);
-                    std::cout << "exec message recieved " << data.data[0] << " " << data.data[1] << std::endl;
+                    toSend = processExecMessage(receivedMessage);
                     break;
                 case MessageTypes::HEARTBIT_REQUEST:
                     break;
@@ -105,6 +117,82 @@ private:
                     break;
             }
         }
+    }
+
+    void ready() {
+        std::unique_lock<std::mutex> lock(creationLock);
+        created = true;
+        creationalCondition.notify_one();
+
+    }
+
+    void nodeRegister() {
+        Message
+    }
+
+    Message processCreateMessage(Message& message) {
+        MessageData data = MessageBuilder::deserialize(message.body);
+        int id = stoi(data.data[0], nullptr);
+        int parentId = stoi(data.data[1], nullptr);
+        std::cout << "need to create node " << id << "from parent " << parentId << std::endl;
+        return create(id, parentId);
+    }
+
+    Message create(int id, int pId) {
+        if (serversId.find(id) != serversId.end()) {
+            std::cout << "already exist" << std::endl;
+            return {MessageTypes::CREATE_FAIL, Id, Id, "Already exist"};
+        }
+        if (serversId.find(pId) == serversId.end()) {
+            std::cout << "parent not found" << std::endl;
+            return {MessageTypes::CREATE_FAIL, Id, Id, "Parent not found"};
+        }
+        if (pId == Id) {
+            pid_t pid = addChild(id, port);
+            serversId.insert(id);
+            std::unique_lock<std::mutex> lock(creationLock);
+            created = false;
+            while(!created)
+                creationalCondition.wait(lock);
+            std::cout << "awaited" << std::endl;
+            return {MessageTypes::CREATE_RESULT, Id, Id, sizeof(pid), (void*)&pid};
+        }
+        for (auto server: outerNodes) {
+            zmq::socket_t requestSocket(context, zmq::socket_type::req);
+            requestSocket.connect(ZmqUtils::getOutputAddress(server.second.messageRecieverPort));
+            int data[] = {id, pId};
+            Message request(MessageTypes::CREATE_REQUEST, Id, server.first, sizeof(data), data);
+            Message result;
+            request.sendMessage(requestSocket);
+            result.receiveMessage(receiverSocket);
+            if (result.messageType == MessageTypes::CREATE_RESULT) {
+                requestSocket.disconnect(ZmqUtils::getOutputAddress(server.second.messageRecieverPort));
+                serversId.insert(id);
+                return {MessageTypes::CREATE_RESULT, Id, Id, result.sizeOfBody, result.body};
+            }
+        }
+    }
+
+    Message processExecMessage(Message& message) {
+        MessageData data = MessageBuilder::deserialize(message.body);
+        if (serversId.find(data.id) == serversId.end()) {
+            std::cout << "id " << data.id << " not found" << std::endl;
+            return {MessageTypes::EXEC_FAIL, Id, Id, "Node not found"};
+        }
+        for (auto server : outerNodes) {
+            zmq::socket_t request(context, zmq::socket_type::req);
+            request.connect(ZmqUtils::getOutputAddress(server.second.messageRecieverPort));
+            message.senderId = Id;
+            message.recieverId = server.first;
+            message.sendMessage(request);
+            Message result;
+            if (result.messageType == MessageTypes::EXEC_RESULT) {
+                return result;
+            }
+            request.disconnect(ZmqUtils::getOutputAddress(server.second.messageRecieverPort));
+        }
+        std::cout << "node unaviable" << std::endl;
+        return Message(MessageTypes::EXEC_FAIL, Id, Id, "Error node unaviable");
     }
 };
 

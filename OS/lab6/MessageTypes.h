@@ -16,6 +16,8 @@ enum class MessageTypes : int {
     HEARTBIT_REQUEST,
     HEARTBIT_RESULT,
     HEARTBIT_FAIL,
+    RELATE_RESULT,
+    RELATE_REQUEST,
     QUIT,
     EMPTY,
     TEST,

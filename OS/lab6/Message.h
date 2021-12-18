@@ -62,7 +62,6 @@ public:
         zmq::message_t receivedType;
         zmq::message_t receivedHeader;
         zmq::message_t receivedBody;
-        int64_t q = 0;
         for (bool t = false; !t; t = getMessage(socket, receivedType, receivedHeader, receivedBody)) {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }

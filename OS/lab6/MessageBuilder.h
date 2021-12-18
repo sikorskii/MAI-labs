@@ -12,9 +12,13 @@
 class MessageBuilder {
 public:
     static Message buildCreateMessage() {
-        int messageData[2];
-        std::cin >> messageData[0] >> messageData[1];
-        return {MessageTypes::CREATE_REQUEST, -1, -1, sizeof(messageData), (void*)&messageData};
+        int dummy = -1;
+        std::vector<std::string> data(2);
+        std::cout << "enter new node id and it's parent id\n";
+        std::cin >> data[0] >> data[1];
+        std::cout << data[0] << " " << data[1] << std::endl;
+        void* body = serialize(dummy, data);
+        return {MessageTypes::CREATE_REQUEST, -1, -1, getSize(data), body};
     }
 
     static Message buildTestMessage() {
@@ -33,7 +37,7 @@ public:
         std::cin >> data[0] >> data[1];
         std::cout << id << " " << data[0] << " " << data[1] << "\n";
         void* body = serialize(id, data);
-        return {MessageTypes::EXEC_REQUEST, -1, -1, getSize(data), body};
+        return {MessageTypes::EXEC_REQUEST, -1, id, getSize(data), body};
     }
 
     static int getSize(std::vector<std::string>& vector) {

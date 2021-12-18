@@ -10,14 +10,16 @@
 #include "MessageTypes.h"
 
 class ChildNodeInfo {
+
+    pid_t pid;
+    int childRegisterPort;
+public:
+    int messageRecieverPort;
+
     ChildNodeInfo(pid_t pid, int messageRecieverPort, int childRegisterPort):
     pid(pid), messageRecieverPort(messageRecieverPort),
     childRegisterPort(childRegisterPort)
     {}
-
-    pid_t pid;
-    int messageRecieverPort;
-    int childRegisterPort;
 };
 
 
