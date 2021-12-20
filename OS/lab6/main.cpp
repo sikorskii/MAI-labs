@@ -12,7 +12,7 @@ void child(int sig) {
     pid = wait(nullptr);
 }
 int main() {
-    signal(SIGCHLD, child);
+    //signal(SIGCHLD, child);
 
     SpringBootApplication app;
     app.run();

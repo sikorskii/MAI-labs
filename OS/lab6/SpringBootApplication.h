@@ -138,6 +138,7 @@ private:
                     break;
                 case MessageTypes::QUIT:
                     std::cout << "EXIT" << std::endl;
+                    quit = true;
                     return;
                 case MessageTypes::CREATE_FAIL:
                 case MessageTypes::EXEC_FAIL:
@@ -169,6 +170,7 @@ private:
             messageOut = processRegisterMessage(messageIn);
             ready();
             messageOut.sendMessage(Receiver);
+
         }
     }
 
@@ -272,13 +274,15 @@ private:
             zmq::socket_t request(context, zmq::socket_type::req);
             request.connect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
             messageExit.sendMessage(request);
+            messageExit.receiveMessage(request, std::chrono::milliseconds(2000));
+            //messageExit.sendMessage(Receiver);
             Message exitResult;
-            exitResult.receiveMessage(request, std::chrono::milliseconds(2000));
+            //messageExit.receiveMessage(Receiver, std::chrono::milliseconds(1000));
             //exitResult.receiveMessage(request);
             request.disconnect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
         }
-        std::cout << "servers dead" << std::endl;
         exit = true;
+        std::cout << "servers dead" << std::endl;
         return messageExit;
     }
 
