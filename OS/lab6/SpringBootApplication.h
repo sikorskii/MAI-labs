@@ -79,6 +79,7 @@ private:
         fromInputProcessor.bind(ZmqUtils::MESSAGE_PROCESSOR_URL);
         toOutput.connect(ZmqUtils::MESSAGE_SENDER_URL);
         MessageData data;
+        std::thread pl;
         Message toSend;
         bool quit = false;
         while(!quit) {
@@ -96,8 +97,9 @@ private:
                     break;
                 case MessageTypes::HEARTBIT_REQUEST:
                     time = *(int*)receivedMessage.body;
-                    //std::thread([this]() {pingListener(time);}).detach();
                     processPingRequest(time);
+                    pl = std::thread(pingListener, std::ref(context), std::ref(serversId), time, std::ref(quit));
+                    pl.detach();
                     break;
                 case MessageTypes::QUIT:
                     toSend = exitProcessor(std::move(receivedMessage), quit);
@@ -112,12 +114,27 @@ private:
     void processPingRequest(int time) {
         for (auto server: outerNodes) {
             Message pingRequest = MessageBuilder::buildPingRequest(time, Id);
-            zmq::socket_t socket(context, zmq::socket_type::req);
+            zmq::socket_t socket(context, zmq::socket_type::push);
             socket.connect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
             pingRequest.sendMessage(socket);
-            pingRequest.receiveMessage(socket, std::chrono::milliseconds(100));
             std::cout << "message sent to node " << server.first << std::endl;
             socket.disconnect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
+        }
+    }
+
+    static void pingListener(zmq::context_t& context, std::set<int>& serversId, int time, bool& exit) {
+        zmq::socket_t listener(context, zmq::socket_type::pull);
+        while (!exit) {
+            Message pingMessage;
+            if (!pingMessage.receiveMessage(listener, std::chrono::milliseconds(time * 4))) {
+                std::cout << "no hb answer for a long time" << std::endl;
+                return;
+            }
+            if (pingMessage.messageType != MessageTypes::HEARTBIT_RESULT) {
+                std::cout << "wrong message arrived to listener" << std::endl;
+                return;
+            }
+
         }
     }
 

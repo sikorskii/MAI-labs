@@ -100,7 +100,7 @@ private:
         hb.detach();
         std::cout << "Heartbit started" << std::endl;
         for (auto server: outerNodes) {
-            zmq::socket_t requestSocket(context, zmq::socket_type::req);
+            zmq::socket_t requestSocket(context, zmq::socket_type::push);
             requestSocket.connect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
             Message request = MessageBuilder::buildPingRequest(bit, Id);
             std::cout << "before disconnect" << std::endl;

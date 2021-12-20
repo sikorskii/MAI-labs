@@ -16,7 +16,7 @@ void child(int sig) {
 }
 
 int main(int argc, char** argv) {
-    //signal(SIGCHLD, child);
+    signal(SIGCHLD, child);
     if (argc != 4) {
         return 0;
     }
