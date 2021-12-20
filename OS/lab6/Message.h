@@ -7,6 +7,7 @@
 
 #include "zmq.hpp"
 #include <chrono>
+#include <thread>
 #include "MessageTypes.h"
 
 
@@ -17,20 +18,46 @@ public:
         if (sizeOfBody > 0) {
             body = malloc(sizeOfBody);
             memcpy(body, _body, _sizeOfBody);
-            //std::cout <<  "_body " << ((int*)_body)[0] << "\n";
-            //std::cout << "body " << ((int*)body)[0] << "\n";
         }
     }
 
     Message(): Message(MessageTypes::EMPTY, -1, -1, 0, nullptr) {
     }
 
-    Message(MessageTypes messageType, int senderId, int32_t receiverId):
+    Message(MessageTypes messageType, int senderId, int receiverId):
             Message(messageType, senderId, receiverId, 0, nullptr)
     {
     }
+    ~Message() {
+        if (body != nullptr) {
+            free(body);
+            body = nullptr;
+        }
+    }
 
+    Message(Message&& message) noexcept {
+        messageType = message.messageType;
+        senderId = message.senderId;
+        recieverId = message.recieverId;
+        sizeOfBody = message.sizeOfBody;
+        body = message.body;
+        message.body = nullptr;
+    }
 
+    Message& operator= (Message&& message) noexcept {
+        if (body != nullptr) {
+            free(body);
+            body = nullptr;
+        }
+
+        messageType = message.messageType;
+        senderId = message.senderId;
+        recieverId = message.recieverId;
+        sizeOfBody = message.sizeOfBody;
+        body = message.body;
+        message.body = nullptr;
+        return *this;
+    }
     Message(MessageTypes messageType, int senderId, int receiverId, const char* str):
             Message(messageType, senderId, receiverId)
     {
@@ -39,12 +66,6 @@ public:
             body = operator new(sizeOfBody);
             memcpy(body, (void*)str, sizeOfBody);
         }
-    }
-
-    ~Message() {
-        if (body != nullptr)
-            operator delete(body);
-        body = nullptr;
     }
 
     void sendMessage(zmq::socket_t& socket) {
@@ -75,6 +96,37 @@ public:
             body = operator new(sizeOfBody);
             memcpy(body, receivedBody.data(), sizeOfBody);
         }
+    }
+
+    bool receiveMessage(zmq::socket_t& socket, std::chrono::milliseconds time) {
+        zmq::message_t receivedType;
+        zmq::message_t receivedHeader;
+        zmq::message_t receivedBody;
+        unsigned long long passed = 0;
+        bool t = false;
+        std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
+        for ( ; !t && passed < time.count(); t = getMessage(socket, receivedType, receivedHeader, receivedBody)) {
+            passed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+        if (!t)
+            return false;
+        messageType = *(MessageTypes*)receivedType.data();
+        senderId = ((int*)receivedHeader.data())[0];
+        recieverId = ((int*)receivedHeader.data())[1];
+        sizeOfBody = ((int*)receivedHeader.data())[2];
+        operator delete(body);
+        body = nullptr;
+        if (sizeOfBody > 0) {
+            body = operator new(sizeOfBody);
+            memcpy(body, receivedBody.data(), sizeOfBody);
+        }
+        return true;
+    }
+
+    void update(int senderID, int receiverId) {
+        senderId = senderID;
+        recieverId = receiverId;
     }
 
     MessageTypes messageType;

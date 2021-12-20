@@ -11,15 +11,15 @@
 
 class ChildNodeInfo {
 
-    pid_t pid;
-    int childRegisterPort;
 public:
-    int messageRecieverPort;
-
     ChildNodeInfo(pid_t pid, int messageRecieverPort, int childRegisterPort):
-    pid(pid), messageRecieverPort(messageRecieverPort),
-    childRegisterPort(childRegisterPort)
+            Pid(pid), ReceiverPort(messageRecieverPort),
+            RegisterPort(childRegisterPort)
     {}
+    pid_t Pid;
+    int RegisterPort;
+
+    int ReceiverPort;
 };
 
 

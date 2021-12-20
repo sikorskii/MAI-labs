@@ -9,6 +9,8 @@
 #include "SpringBootApplication.h"
 #include "AbstractNode.h"
 #include "Message.h"
+#include "MessageData.h"
+#include "MessageBuilder.h"
 
 class ServerNode : public AbstractNode{
 public:
@@ -17,30 +19,39 @@ public:
         registerSocket(context, zmq::socket_type::rep) {
         occupyPort();
         registerPort = ZmqUtils::occupyPort(registerSocket);
+        selfRelation(parentRegPort);
     }
 
     void run() {
+        std::cout << "SERVER CREATED" << std::endl;
         std::thread([this]() {registrator();}).detach();
+        bool quit = false;
         while (true) {
             Message messageOut;
             Message messageIn;
-            messageIn.receiveMessage(receiverSocket);
+            //std::cout << "before recieving" << std::endl;
+            if (!messageIn.receiveMessage(Receiver, std::chrono::milliseconds(100))) {
+                continue;
+            }
+            //std::cout << "after recevinge" << std::endl;
             switch (messageIn.messageType) {
                 case MessageTypes::CREATE_REQUEST:
                     messageOut = createProcessor(messageIn);
-                    messageOut.sendMessage(receiverSocket);
+                    messageOut.sendMessage(Receiver);
                     break;
                 case MessageTypes::EXEC_REQUEST:
                     messageOut = execProcessor(messageIn);
-                    messageOut.sendMessage(receiverSocket);
+                    messageOut.sendMessage(Receiver);
                     break;
                 case MessageTypes::HEARTBIT_REQUEST:
-                    //messageOut = heartbitProcessor(messageIn);
-                    messageOut.sendMessage(receiverSocket);
+                    std::cout << "Heartbit request arrived at server " << Id << std::endl;
+                    heartbit(std::move(messageIn), quit);
+                    //messageOut.sendMessage(Receiver);
                     break;
                 case MessageTypes::QUIT:
                     messageOut = quitProcessor(messageIn);
-                    messageOut.sendMessage(receiverSocket);
+                    messageOut.sendMessage(Receiver);
+                    quit = true;
                     exit(1);
                 default:
                     break;
@@ -59,9 +70,11 @@ private:
 
     void registrator() {
         Message messageIn;
+        std::cout << "from registrator " << getpid() << std::endl;
         Message messageOut;
         while (true) {
             messageIn.receiveMessage(registerSocket);
+            std::cout << "register message got" << std::endl;
             if (messageIn.messageType == MessageTypes::QUIT) {
                 messageIn.sendMessage(registerSocket);
                 break;
@@ -69,6 +82,32 @@ private:
             messageOut = registerProcessor(messageIn);
             ready();
             messageOut.sendMessage(registerSocket);
+        }
+    }
+
+    static void pingProcessor(int& time, bool& exit) {
+       while(!exit) {
+            std::cout << getpid() << " " << time << std::endl;
+           std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+       }
+       std::cout << "heartbit exit2" <<  std::endl;
+       return;
+    }
+
+    void heartbit(Message&& message, bool& exit) {
+        int bit = *(int*)message.body;
+        std::thread hb(pingProcessor, std::ref(bit), std::ref(exit));
+        hb.detach();
+        std::cout << "Heartbit started" << std::endl;
+        for (auto server: outerNodes) {
+            zmq::socket_t requestSocket(context, zmq::socket_type::req);
+            requestSocket.connect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
+            Message request = MessageBuilder::buildPingRequest(bit, Id);
+            std::cout << "before disconnect" << std::endl;
+            request.sendMessage(requestSocket);
+            request.receiveMessage(requestSocket, std::chrono::milliseconds(100));
+            requestSocket.disconnect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
+            std::cout << "after disconnect" << std::endl;
         }
     }
 
@@ -92,7 +131,7 @@ private:
     void selfRelation(int _registerPort) {
         zmq::socket_t sender(context, zmq::socket_type::req);
         sender.connect(ZmqUtils::getOutputAddress(_registerPort));
-        void* relationBody = createRelation(getpid(), port, registerPort);
+        void* relationBody = createRelation(getpid(), Port, registerPort);
         Message message(MessageTypes::RELATE_REQUEST, Id, parentId, 2 * sizeof(int) + sizeof(pid_t), relationBody);
         message.sendMessage(sender);
         message.receiveMessage(sender);
@@ -129,18 +168,22 @@ private:
         int pid = -1;
         for (auto server: outerNodes) {
             zmq::socket_t sender(context, zmq::socket_type::req);
-            sender.connect(ZmqUtils::getOutputAddress(server.second.messageRecieverPort));
+            sender.connect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
             int data[] = {id, parId};
-            Message request(MessageTypes::RELATE_REQUEST, Id, server.first, sizeof(data), (void*)data);
+            Message request(MessageTypes::CREATE_REQUEST, Id, server.first, sizeof(data), (void*)data);
             Message result;
             request.sendMessage(sender);
-            result.receiveMessage(sender);
+            //result.receiveMessage(sender);
+            if (!result.receiveMessage(sender, std::chrono::milliseconds(2000))) {
+                sender.disconnect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
+                continue;
+            }
             if (result.messageType == MessageTypes::CREATE_RESULT) {
                 pid = *(int*)result.body;
-                sender.disconnect(ZmqUtils::getOutputAddress(server.second.messageRecieverPort));
+                sender.disconnect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
                 break;
             }
-            sender.disconnect(ZmqUtils::getOutputAddress(server.second.messageRecieverPort));
+            sender.disconnect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
         }
         if (pid == -1) {
             return {MessageTypes::CREATE_FAIL, Id, sndId, sizeof(pid), &pid};
@@ -148,20 +191,75 @@ private:
         return {MessageTypes::CREATE_RESULT, Id, sndId, sizeof(pid), &pid};
     }
 
+    Message execProcessor(Message& message) {
+        MessageData data = MessageBuilder::deserialize(message.body);
+        std::string text = data.data[0];
+        std::string pattern = data.data[1];
+        //std::cout << "EXEC INFO: Id " << Id << "target id " << data.id << std::endl;
+        if (data.id == Id) {
+            text = text.substr(0, data.len1);
+            pattern = pattern.substr(0, data.len2);
+            size_t found = text.find(pattern, 0);
+            std::string answer;
+            if (found != std::string::npos) {
+                while (found != std::string::npos) {
+                    answer += std::to_string(found);
+                    answer += " ";
+                    found = text.find(pattern, found + 1);
+                }
+                std::cout << answer << std::endl;
+            }
+            else {
+                std::cout << "NOT FOUND!" << std::endl;
+            }
+            std::vector<std::string> newData(2);
+            newData[0] = answer;
+            newData[1] = "";
+            void* newBody = MessageBuilder::serialize(data.id, newData);
+            int newSize = MessageBuilder::getSize(newData);
+            std::cout << "RECEVIEd!! " << text << " " << pattern << std::endl;
+            return {MessageTypes::EXEC_RESULT, Id, parentId, newSize, newBody};
+        }
+        for (auto server : this->outerNodes) {
+            zmq::socket_t requester(context, zmq::socket_type::req);
+            requester.connect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
+            message.update(Id, server.first);
+            message.sendMessage(requester);
+            Message result;
+            //result.receiveMessage(requester);
+            if (!result.receiveMessage(requester, std::chrono::milliseconds(2000))) {
+                requester.disconnect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
+                continue;
+            }
+            if (result.messageType == MessageTypes::EXEC_RESULT) {
+                result.update(Id, parentId);
+                requester.disconnect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
+                return result;
+            }
+            requester.disconnect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
+        }
+        return {MessageTypes::EXEC_FAIL, Id, parentId, "node is unaviable"};
+    }
+
     Message quitProcessor(Message& message) {
         Message messageQuit(MessageTypes::QUIT, Id, Id);
         for (auto server: outerNodes) {
             zmq::socket_t request(context, zmq::socket_type::req);
-            request.connect(ZmqUtils::getOutputAddress(server.second.messageRecieverPort));
+            request.connect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
             messageQuit.sendMessage(request);
             Message messageResult;
-            messageResult.receiveMessage(request);
-            request.disconnect(ZmqUtils::getOutputAddress(server.second.messageRecieverPort));
+            //messageResult.receiveMessage(request);
+            if (!messageResult.receiveMessage(request, std::chrono::milliseconds(2000))) {
+                request.disconnect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
+                continue;
+            }
+            request.disconnect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
         }
         zmq::socket_t request(context, zmq::socket_type::req);
         request.connect(ZmqUtils::getOutputAddress(registerPort));
         messageQuit.sendMessage(request);
-        messageQuit.receiveMessage(request);
+        //messageQuit.receiveMessage(request);
+        messageQuit.receiveMessage(request, std::chrono::milliseconds(2000));
         request.disconnect(ZmqUtils::getOutputAddress(registerPort));
         return messageQuit;
     }

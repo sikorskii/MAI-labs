@@ -11,23 +11,29 @@
 
 class MessageBuilder {
 public:
-    static Message buildCreateMessage() {
-        int dummy = -1;
-        std::vector<std::string> data(2);
-        std::cout << "enter new node id and it's parent id\n";
+    static Message buildCreateMessage(int Id) {
+        int data[2];
         std::cin >> data[0] >> data[1];
-        std::cout << data[0] << " " << data[1] << std::endl;
-        void* body = serialize(dummy, data);
-        return {MessageTypes::CREATE_REQUEST, -1, -1, getSize(data), body};
+        std::cout << "add new node " << data[0] << " to parent " << data[1] << std::endl;
+        return {MessageTypes::CREATE_REQUEST, Id, Id, sizeof(data), (void*)&data};
     }
+
+    static Message buildPingRequest(int time, int id) {
+        return {MessageTypes::HEARTBIT_REQUEST, -1, id, sizeof(int), (void*)&time};
+    }
+
+    static Message buildPingMessage(unsigned long long time, int Id) {
+        return {MessageTypes::HEARTBIT_RESULT, Id, -1, sizeof(unsigned long long), (void*)&time};
+    }
+
 
     static Message buildTestMessage() {
         const char *testMessage = "first";
         return {MessageTypes::TEST, -1, -1, testMessage};
     }
 
-    static Message buildExitMessage() {
-        return {MessageTypes::QUIT, -1, -1};
+    static Message buildExitMessage(int Id) {
+        return {MessageTypes::QUIT, Id, Id};
     }
 
     static Message buildExecMessage() {
@@ -78,6 +84,8 @@ public:
         void* str2 = malloc(size2);
         memcpy(str2, ((char*)messageBody + offset), size2 * sizeof(char));
         //std::cout << data.id << " " << size1 << " "  << (char*)str1 << " " << size2 << " " << (char*)str2 << "\n";
+        data.len1 = size1;
+        data.len2 = size2;
         data.data.emplace_back((char*)str1);
         data.data.emplace_back((char*)str2);
         return data;

@@ -15,10 +15,10 @@ public:
     static const int PORT_TO_BIND_FROM = 30000;
 
     inline static const char* INPUT_URL_TEMPLATE = "tcp://*:";
-    inline static const char* OUTPUT_URL_TEMPLATE = "tcp://localhost";
+    inline static const char* OUTPUT_URL_TEMPLATE = "tcp://localhost:";
     // in-process communication between threads in running manage node
-    inline static char* MESSAGE_PROCESSOR_URL =  "inproc://processor";
-    inline static char* MESSAGE_SENDER_URL = "inproc://sender";
+    inline static const char* MESSAGE_PROCESSOR_URL =  "inproc://processor";
+    inline static const char* MESSAGE_SENDER_URL = "inproc://sender";
 
     static std::string getInputAddress(int port) {
         return INPUT_URL_TEMPLATE + std::to_string(port);
