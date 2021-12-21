@@ -28,6 +28,7 @@ public:
         //std::cout << "port " << Port << " parent port " << parentPort << std::endl;
         std::thread([this]() {registrator();}).detach();
         bool quit = false;
+        bool ping = false;
         while (true) {
             Message messageOut;
             Message messageIn;
@@ -51,13 +52,13 @@ public:
                     std::cout << "Heartbit request arrived at server " << Id << std::endl;
                     time = *(int*)messageIn.body;
                     processPingRequest(time);
-                    //th = std::thread([this, &time, &quit]() { bitGenerator(*this, time, quit); });
-                    //th.detach();
+                    if (!ping) {
+                        ping = true;
+                        th = std::thread([this, &time, &quit]() { bitGenerator(*this, time, quit); });
+                        th.detach();
+                    }
                     messageIn.sendMessage(Receiver);
                     break;
-                case MessageTypes::HEARTBIT_RESULT:
-                    std::cout << "node " << Id << "got ping from node " << messageIn.senderId << std::endl;
-                    messageIn.sendMessage(Receiver);
                 case MessageTypes::QUIT:
                     messageOut = quitProcessor(messageIn);
                     messageOut.sendMessage(Receiver);
@@ -80,9 +81,22 @@ private:
 
     static void bitGenerator(ServerNode& that, int& time, bool& exit) {
         while (!exit) {
-            Message bit = MessageBuilder::buildPingMessage(time, that.Id);
-            bit.sendMessage(that.Receiver);
-            bit.receiveMessage(that.Receiver);
+            for (auto server: that.outerNodes) {
+                zmq::socket_t sender(that.context, zmq::socket_type::req);
+                sender.connect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
+                Message pingRequest = MessageBuilder::buildPingRequest(time, server.first);
+                try {
+                    pingRequest.sendMessage(sender);
+                    if (!pingRequest.receiveMessage(sender, std::chrono::milliseconds(time * 4))) {
+                        std::cout << "node " << server.first << " and all her children dead" << std::endl;
+                        that.outerNodes.erase(server.first);
+                    }
+                }
+                catch (const zmq::error_t& error) {
+                    continue;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(time));
+            }
         }
     }
 

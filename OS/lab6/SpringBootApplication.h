@@ -98,6 +98,8 @@ private:
                     break;
                 case MessageTypes::HEARTBIT_REQUEST:
                     time = *(int*)receivedMessage.body;
+                    pl = std::thread([this, &time, &quit]() { pingListener(*this, time, quit); });
+                    pl.detach();
                     processPingRequest(time);
                     break;
                 case MessageTypes::QUIT:
@@ -107,6 +109,27 @@ private:
                     return;
                 default:
                     break;
+            }
+        }
+    }
+
+    static void pingListener(SpringBootApplication& that, int& time, bool& exit) {
+        while(!exit) {
+            for (auto server: that.outerNodes) {
+                zmq::socket_t sender(that.context, zmq::socket_type::req);
+                sender.connect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
+                Message pingRequest = MessageBuilder::buildPingRequest(time, server.first);
+                try {
+                    pingRequest.sendMessage(sender);
+                    if (!pingRequest.receiveMessage(sender, std::chrono::milliseconds(time * 4))) {
+                        std::cout << "node " << server.first << " and all her children dead" << std::endl;
+                        that.outerNodes.erase(server.first);
+                    }
+                }
+                catch (const zmq::error_t& error) {
+                    continue;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(time));
             }
         }
     }
@@ -122,10 +145,6 @@ private:
             socket.disconnect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
         }
     }
-
-
-
-
 
     void messageOutput() {
         zmq::socket_t fromMessageProcessor(context, zmq::socket_type::pull);
