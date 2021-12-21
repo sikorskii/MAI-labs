@@ -123,7 +123,7 @@ private:
                     pingRequest.sendMessage(sender);
                     if (!pingRequest.receiveMessage(sender, std::chrono::milliseconds(time * 4))) {
                         std::cout << "node " << server.first << " and all her children dead" << std::endl;
-                        that.outerNodes.erase(server.first);
+                        //that.outerNodes.erase(server.first);
                     }
                 }
                 catch (const zmq::error_t& error) {
@@ -141,7 +141,7 @@ private:
             socket.connect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
             pingRequest.sendMessage(socket);
             pingRequest.receiveMessage(socket, std::chrono::milliseconds(100));
-            std::cout << "message sent to node " << server.first << std::endl;
+            //std::cout << "message sent to node " << server.first << std::endl;
             socket.disconnect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
         }
     }
