@@ -9,14 +9,15 @@
 #include "SpringBootApplication.h"
 #include "AbstractNode.h"
 #include "Message.h"
+#include <chrono>
 #include "MessageData.h"
 #include "MessageBuilder.h"
 
 class ServerNode : public AbstractNode{
 public:
     ServerNode(int id, int _parentId, int _parentPort, int _registerPort) :
-        AbstractNode(id), parentId(_parentId), parentPort(_parentPort), parentRegPort(_registerPort),
-        registerSocket(context, zmq::socket_type::rep) {
+            AbstractNode(id), parentId(_parentId), parentPort(_parentPort), parentRegPort(_registerPort),
+            registerSocket(context, zmq::socket_type::rep) {
         occupyPort();
         registerPort = ZmqUtils::occupyPort(registerSocket);
         selfRelation(parentRegPort);
@@ -24,6 +25,7 @@ public:
 
     void run() {
         std::cout << "SERVER CREATED" << std::endl;
+        //std::cout << "port " << Port << " parent port " << parentPort << std::endl;
         std::thread([this]() {registrator();}).detach();
         bool quit = false;
         while (true) {
@@ -34,6 +36,8 @@ public:
                 continue;
             }
             //std::cout << "after recevinge" << std::endl;
+            int time;
+            std::thread th;
             switch (messageIn.messageType) {
                 case MessageTypes::CREATE_REQUEST:
                     messageOut = createProcessor(messageIn);
@@ -45,9 +49,15 @@ public:
                     break;
                 case MessageTypes::HEARTBIT_REQUEST:
                     std::cout << "Heartbit request arrived at server " << Id << std::endl;
-                    heartbit(std::move(messageIn), quit);
-                    //messageOut.sendMessage(Receiver);
+                    time = *(int*)messageIn.body;
+                    processPingRequest(time);
+                    //th = std::thread([this, &time, &quit]() { bitGenerator(*this, time, quit); });
+                    //th.detach();
+                    messageIn.sendMessage(Receiver);
                     break;
+                case MessageTypes::HEARTBIT_RESULT:
+                    std::cout << "node " << Id << "got ping from node " << messageIn.senderId << std::endl;
+                    messageIn.sendMessage(Receiver);
                 case MessageTypes::QUIT:
                     messageOut = quitProcessor(messageIn);
                     messageOut.sendMessage(Receiver);
@@ -68,6 +78,25 @@ private:
     std::condition_variable creationalCondition;
     bool created;
 
+    static void bitGenerator(ServerNode& that, int& time, bool& exit) {
+        while (!exit) {
+            Message bit = MessageBuilder::buildPingMessage(time, that.Id);
+            bit.sendMessage(that.Receiver);
+            bit.receiveMessage(that.Receiver);
+        }
+    }
+
+    void processPingRequest(int time) {
+        for (auto server: outerNodes) {
+            Message pingRequest = MessageBuilder::buildPingRequest(time, Id);
+            zmq::socket_t socket(context, zmq::socket_type::req);
+            socket.connect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
+            pingRequest.sendMessage(socket);
+            pingRequest.receiveMessage(socket, std::chrono::milliseconds(1000));
+            std::cout << "message sent to node " << server.first << std::endl;
+            socket.disconnect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
+        }
+    }
     void registrator() {
         Message messageIn;
         std::cout << "from registrator " << getpid() << std::endl;
@@ -85,31 +114,6 @@ private:
         }
     }
 
-    static void pingProcessor(int& time, bool& exit) {
-       while(!exit) {
-            std::cout << getpid() << " " << time << std::endl;
-           std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-       }
-       std::cout << "heartbit exit2" <<  std::endl;
-       return;
-    }
-
-    void heartbit(Message&& message, bool& exit) {
-        int bit = *(int*)message.body;
-        std::thread hb(pingProcessor, std::ref(bit), std::ref(exit));
-        hb.detach();
-        std::cout << "Heartbit started" << std::endl;
-        for (auto server: outerNodes) {
-            zmq::socket_t requestSocket(context, zmq::socket_type::push);
-            requestSocket.connect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
-            Message request = MessageBuilder::buildPingRequest(bit, Id);
-            std::cout << "before disconnect" << std::endl;
-            request.sendMessage(requestSocket);
-            request.receiveMessage(requestSocket, std::chrono::milliseconds(100));
-            requestSocket.disconnect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
-            std::cout << "after disconnect" << std::endl;
-        }
-    }
 
     void ready() {
         std::unique_lock<std::mutex> lock(creationalBlock);

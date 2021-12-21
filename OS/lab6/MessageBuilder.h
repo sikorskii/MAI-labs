@@ -19,7 +19,7 @@ public:
     }
 
     static Message buildPingRequest(int time, int id) {
-        return {MessageTypes::HEARTBIT_REQUEST, -1, id, sizeof(int), (void*)&time};
+        return {MessageTypes::HEARTBIT_REQUEST, id, -1, sizeof(int), (void*)&time};
     }
 
     static Message buildPingMessage(unsigned long long time, int Id) {

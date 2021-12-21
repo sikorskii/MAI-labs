@@ -86,6 +86,7 @@ private:
             Message receivedMessage;
             receivedMessage.receiveMessage(fromInputProcessor);
             int time;
+            std::thread th;
             switch (receivedMessage.messageType) {
                 case MessageTypes::CREATE_REQUEST:
                     toSend = processCreateMessage(std::move(receivedMessage));
@@ -98,11 +99,10 @@ private:
                 case MessageTypes::HEARTBIT_REQUEST:
                     time = *(int*)receivedMessage.body;
                     processPingRequest(time);
-                    pl = std::thread(pingListener, std::ref(context), std::ref(serversId), time, std::ref(quit));
-                    pl.detach();
                     break;
                 case MessageTypes::QUIT:
                     toSend = exitProcessor(std::move(receivedMessage), quit);
+                    quit = true;
                     toSend.sendMessage(toOutput);
                     return;
                 default:
@@ -114,29 +114,17 @@ private:
     void processPingRequest(int time) {
         for (auto server: outerNodes) {
             Message pingRequest = MessageBuilder::buildPingRequest(time, Id);
-            zmq::socket_t socket(context, zmq::socket_type::push);
+            zmq::socket_t socket(context, zmq::socket_type::req);
             socket.connect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
             pingRequest.sendMessage(socket);
+            pingRequest.receiveMessage(socket, std::chrono::milliseconds(100));
             std::cout << "message sent to node " << server.first << std::endl;
             socket.disconnect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
         }
     }
 
-    static void pingListener(zmq::context_t& context, std::set<int>& serversId, int time, bool& exit) {
-        zmq::socket_t listener(context, zmq::socket_type::pull);
-        while (!exit) {
-            Message pingMessage;
-            if (!pingMessage.receiveMessage(listener, std::chrono::milliseconds(time * 4))) {
-                std::cout << "no hb answer for a long time" << std::endl;
-                return;
-            }
-            if (pingMessage.messageType != MessageTypes::HEARTBIT_RESULT) {
-                std::cout << "wrong message arrived to listener" << std::endl;
-                return;
-            }
 
-        }
-    }
+
 
 
     void messageOutput() {
@@ -287,6 +275,7 @@ private:
         temporary.receiveMessage(exitRegister);
         exitRegister.disconnect(ZmqUtils::getOutputAddress(Port));
         std::cout << "closing begins" << std::endl;
+        exit = true;
         for (auto server: outerNodes) {
             zmq::socket_t request(context, zmq::socket_type::req);
             request.connect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
@@ -298,7 +287,6 @@ private:
             //exitResult.receiveMessage(request);
             request.disconnect(ZmqUtils::getOutputAddress(server.second.ReceiverPort));
         }
-        exit = true;
         std::cout << "servers dead" << std::endl;
         return messageExit;
     }
