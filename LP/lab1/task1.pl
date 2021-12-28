@@ -34,3 +34,15 @@ is_even(N) :- N mod 2=:=0.
 cnter([],0).
 cnter([H|T],X):- is_even(H),!,cnter(T,X1), X is X1+1.
 cnter([_|T],X):- cnter(T,X).
+
+
+solution([], []) :- !.
+
+solution([X], [X]) :- !.
+solution([F, S|T], [S, F|OT]) :- solution(T, OT).
+
+
+solution2([A1,A3, B1, B2, C2, C3]) :- my_permute([4, 5, 6, 7, 8, 9], [A1, A3, B1, B2, C2, C3]),
+A1 + 1 + A3 =:= 15, B1 + B2 + 3 =:= 15, 2 + C2 + C3 =:= 15,
+A1 + B1 + 2 =:= 15, 1 + B2 + C2 =:= 15, A3 + 3 + C3 =:= 15.
+

@@ -65,8 +65,6 @@ private:
             }
             else {
                 std::cin.clear();
-                std::cin.ignore(std::numeric_limits<int>::max(), '\n');
-                std::cout << "wrong input" << std::endl;
             }
 
         }
@@ -164,9 +162,7 @@ private:
                     std::cout << "EXIT" << std::endl;
                     quit = true;
                     return;
-                case MessageTypes::CREATE_FAIL:
-                case MessageTypes::EXEC_FAIL:
-                case MessageTypes::HEARTBIT_FAIL:
+
                 default:
                     std::cout << "another message\n";
                     break;

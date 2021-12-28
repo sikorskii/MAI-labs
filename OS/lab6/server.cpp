@@ -9,7 +9,6 @@
 #include "wait.h"
 #include "SpringBootApplication.h"
 #include "ServerNode.h"
-
 void child(int sig) {
     pid_t pid;
     pid = wait(nullptr);
