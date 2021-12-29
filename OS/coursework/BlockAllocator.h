@@ -24,7 +24,7 @@ public:
 
     pointer allocate(size_type size) override {
         if (size <= 0) {
-            std::cout << "size must be > 0" << std::endl;
+            std::cout << "blockSize must be > 0" << std::endl;
             return nullptr;
         }
         if (size > totalSize - usedSize) {
