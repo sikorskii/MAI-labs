@@ -1,0 +1,92 @@
+execve("./lab3.out", ["./lab3.out", "4"], 0x7ffcc685bde8 /* 25 vars */) = 0
+brk(NULL)                               = 0x55e732841000
+arch_prctl(0x3001 /* ARCH_??? */, 0x7ffe9a527a70) = -1 EINVAL (Invalid argument)
+access("/etc/ld.so.preload", R_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+fstat(3, {st_mode=S_IFREG|0644, st_size=74168, ...}) = 0
+mmap(NULL, 74168, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7fcc8d86a000
+close(3)                                = 0
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libpthread.so.0", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0000\201\0\0\0\0\0\0"..., 832) = 832
+pread64(3, "\4\0\0\0\24\0\0\0\3\0\0\0GNU\0{\324M\31\306%'\265\343\356k%\214\217\2035"..., 68, 824) = 68
+fstat(3, {st_mode=S_IFREG|0755, st_size=151232, ...}) = 0
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7fcc8d868000
+mmap(NULL, 136272, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7fcc8d846000
+mmap(0x7fcc8d84d000, 65536, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x7000) = 0x7fcc8d84d000
+mmap(0x7fcc8d85d000, 20480, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x17000) = 0x7fcc8d85d000
+mmap(0x7fcc8d862000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1b000) = 0x7fcc8d862000
+mmap(0x7fcc8d864000, 13392, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7fcc8d864000
+close(3)                                = 0
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\360\215\2\0\0\0\0\0"..., 832) = 832
+pread64(3, "\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0"..., 784, 64) = 784
+pread64(3, "\4\0\0\0\20\0\0\0\5\0\0\0GNU\0\2\0\0\300\4\0\0\0\3\0\0\0\0\0\0\0", 32, 848) = 32
+pread64(3, "\4\0\0\0\24\0\0\0\3\0\0\0GNU\0~\303\347M\250B\312<j\233\242\v!0<\341"..., 68, 880) = 68
+fstat(3, {st_mode=S_IFREG|0755, st_size=1995896, ...}) = 0
+pread64(3, "\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0"..., 784, 64) = 784
+mmap(NULL, 2004064, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7fcc8d65c000
+mprotect(0x7fcc8d682000, 1810432, PROT_NONE) = 0
+mmap(0x7fcc8d682000, 1495040, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x26000) = 0x7fcc8d682000
+mmap(0x7fcc8d7ef000, 311296, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x193000) = 0x7fcc8d7ef000
+mmap(0x7fcc8d83c000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1df000) = 0x7fcc8d83c000
+mmap(0x7fcc8d842000, 13408, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7fcc8d842000
+close(3)                                = 0
+mmap(NULL, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7fcc8d659000
+arch_prctl(ARCH_SET_FS, 0x7fcc8d659740) = 0
+mprotect(0x7fcc8d83c000, 12288, PROT_READ) = 0
+mprotect(0x7fcc8d862000, 4096, PROT_READ) = 0
+mprotect(0x55e730d16000, 4096, PROT_READ) = 0
+mprotect(0x7fcc8d8ab000, 4096, PROT_READ) = 0
+munmap(0x7fcc8d86a000, 74168)           = 0
+set_tid_address(0x7fcc8d659a10)         = 43373
+set_robust_list(0x7fcc8d659a20, 24)     = 0
+rt_sigaction(SIGRTMIN, {sa_handler=0x7fcc8d84db90, sa_mask=[], sa_flags=SA_RESTORER|SA_SIGINFO, sa_restorer=0x7fcc8d85abb0}, NULL, 8) = 0
+rt_sigaction(SIGRT_1, {sa_handler=0x7fcc8d84dc30, sa_mask=[], sa_flags=SA_RESTORER|SA_RESTART|SA_SIGINFO, sa_restorer=0x7fcc8d85abb0}, NULL, 8) = 0
+rt_sigprocmask(SIG_UNBLOCK, [RTMIN RT_1], NULL, 8) = 0
+prlimit64(0, RLIMIT_STACK, NULL, {rlim_cur=8192*1024, rlim_max=RLIM64_INFINITY}) = 0
+fstat(1, {st_mode=S_IFCHR|0620, st_rdev=makedev(0x88, 0x2), ...}) = 0
+brk(NULL)                               = 0x55e732841000
+brk(0x55e732862000)                     = 0x55e732862000
+write(1, "Enter mtx's dimension: \n", 24) = 24
+fstat(0, {st_mode=S_IFCHR|0620, st_rdev=makedev(0x88, 0x2), ...}) = 0
+read(0, "4\n", 1024)                    = 2
+write(1, "Fill mtx with random values?\n", 29) = 29
+write(1, " Enter 1/0 \n", 12)           = 12
+read(0, "1\n", 1024)                    = 2
+write(1, "Matrix will be generated with ra"..., 37) = 37
+write(1, "-----------------Matrix 4 by 4--"..., 48) = 48
+write(1, "    8     3     5     3 \n", 25) = 25
+write(1, "    3     3     1     5 \n", 25) = 25
+write(1, "    7     5     4     3 \n", 25) = 25
+write(1, "    9     9     9     4 \n", 25) = 25
+write(1, "Colums per thread: 1\n", 21)  = 21
+write(1, " Threads: 4, Matrix.size: 4\n", 28) = 28
+mmap(NULL, 8392704, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK, -1, 0) = 0x7fcc8ce58000
+mprotect(0x7fcc8ce59000, 8388608, PROT_READ|PROT_WRITE) = 0
+rt_sigprocmask(SIG_BLOCK, ~[], [], 8)   = 0
+clone(child_stack=0x7fcc8d657ef0, flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, parent_tid=[43374], tls=0x7fcc8d658640, child_tidptr=0x7fcc8d658910) = 43374
+rt_sigprocmask(SIG_SETMASK, [], NULL, 8) = 0
+mmap(NULL, 8392704, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK, -1, 0) = 0x7fcc8c657000
+mprotect(0x7fcc8c658000, 8388608, PROT_READ|PROT_WRITE) = 0
+rt_sigprocmask(SIG_BLOCK, ~[], [], 8)   = 0
+clone(child_stack=0x7fcc8ce56ef0, flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, parent_tid=[43375], tls=0x7fcc8ce57640, child_tidptr=0x7fcc8ce57910) = 43375
+rt_sigprocmask(SIG_SETMASK, [], NULL, 8) = 0
+mmap(NULL, 8392704, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK, -1, 0) = 0x7fcc877ff000
+mprotect(0x7fcc87800000, 8388608, PROT_READ|PROT_WRITE) = 0
+rt_sigprocmask(SIG_BLOCK, ~[], [], 8)   = 0
+clone(child_stack=0x7fcc87ffeef0, flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, parent_tid=[43376], tls=0x7fcc87fff640, child_tidptr=0x7fcc87fff910) = 43376
+rt_sigprocmask(SIG_SETMASK, [], NULL, 8) = 0
+mmap(NULL, 8392704, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK, -1, 0) = 0x7fcc86ffe000
+mprotect(0x7fcc86fff000, 8388608, PROT_READ|PROT_WRITE) = 0
+rt_sigprocmask(SIG_BLOCK, ~[], [], 8)   = 0
+clone(child_stack=0x7fcc877fdef0, flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, parent_tid=[43377], tls=0x7fcc877fe640, child_tidptr=0x7fcc877fe910) = 43377
+rt_sigprocmask(SIG_SETMASK, [], NULL, 8) = 0
+write(1, "ans 0 = 152\n", 12)           = 12
+write(1, "ans 1 = -87\n", 12)           = 12
+write(1, "ans 2 = 672\n", 12)           = 12
+write(1, "ans 3 = -450\n", 13)          = 13
+write(1, "took 1619 mcs\n", 14)         = 14
+write(1, "Multithreading result is 287\n", 29) = 29
+lseek(0, -1, SEEK_CUR)                  = -1 ESPIPE (Illegal seek)
+exit_group(0)                           = ?
++++ exited with 0 +++
