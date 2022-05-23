@@ -5,7 +5,7 @@ from random import randrange
 # value - unsigned long long
 
 
-OUTPUT_DATA_SIZE = 1_000_000
+OUTPUT_DATA_SIZE = 1_000_00
 MAX_VALUE = 999999
 MIN_VALUE = 0
 MIN_V_VALUE = 0

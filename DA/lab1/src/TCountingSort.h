@@ -29,7 +29,7 @@ private:
     static std::vector<int> CountEntries(const std::vector<TKeyValue> &source, const int lower, const int upper) {
         std::vector<int> result(upper - lower + 1, 0);
 
-        for (auto entry: source) {
+        for (TKeyValue entry: source) {
             result[entry.key - lower]++;
         }
         return result;
